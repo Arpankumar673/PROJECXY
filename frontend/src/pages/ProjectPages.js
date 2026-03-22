@@ -63,8 +63,8 @@ export const CreateProject = () => {
     const { data: depts } = await supabase.from('departments').select('id').limit(1);
     
     if (depts && depts.length > 0) {
-      const proj = await projectService.create({ title, abstract, created_by: user.id, department_id: depts[0].id, status: 'pending' });
-      await teamService.addMember(proj.id, user.id, 'Lead');
+      const { data: proj } = await projectService.create({ title, abstract, created_by: user.id, department_id: depts[0].id, status: 'pending' });
+      if (proj) await teamService.addMember(proj.id, user.id, 'Lead');
       navigate('/dashboard');
     } else {
       alert("No departments found. Seed DB first.");
@@ -113,13 +113,13 @@ export const ProjectDetails = () => {
   const fetchData = async () => {
     if (!user) return;
     try {
-        const p = await projectService.getById(id);
-        const m = await milestoneService.getByProject(id);
-        const members = await teamService.getMembers(id);
+        const { data: p } = await projectService.getById(id);
+        const { data: m } = await milestoneService.getByProject(id);
+        const { data: members } = await teamService.getMembers(id);
         
-        setProject(p);
-        setMilestones(m);
-        setIsMember(members.some(mem => mem.user_id === user.id));
+        if (p) setProject(p);
+        if (m) setMilestones(m);
+        if (members) setIsMember(members.some(mem => mem.user_id === user.id));
 
         const { data: req } = await supabase.from('join_requests').select('status').eq('project_id', id).eq('user_id', user.id).maybeSingle();
         if (req) setRequestSent(true);
@@ -129,24 +129,26 @@ export const ProjectDetails = () => {
 
   const handleJoinRequest = async () => {
     try {
-      await supabase.from('join_requests').insert([{ project_id: id, user_id: user.id, message: 'I would like to contribute!' }]);
+      await teamService.sendJoinRequest(id, user.id, 'I would like to contribute!');
       setRequestSent(true);
     } catch(e) { alert(e.message); }
   };
 
   const handleFileUpload = async (milestoneId, file) => {
      try {
+        setLoading(true);
         const path = `milestones/${milestoneId}/${Date.now()}_${file.name}`;
         const url = await storageService.uploadFile('project-assets', path, file);
         await milestoneService.complete(milestoneId, url);
-        fetchData();
+        await fetchData();
      } catch (e) { alert(e.message); }
+     setLoading(false);
   };
 
-  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-12 h-12 text-linkedin-blue animate-spin" /></div>;
-  if (!project) return <div className="p-20 text-center">Project not found or RLS access denied.</div>;
+  if (loading && !project) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-12 h-12 text-linkedin-blue animate-spin" /></div>;
+  if (!project && !loading) return <div className="p-20 text-center">Project not found or RLS access denied.</div>;
 
-  const isCreator = user?.id === project.created_by;
+  const isCreator = user?.id === project?.created_by;
 
   return (
     <div className="grid lg:grid-cols-3 gap-10 items-start animate-fade-in-up">
@@ -154,12 +156,12 @@ export const ProjectDetails = () => {
         <header className="bg-white p-12 rounded-[40px] shadow-card border-l-8 border-l-linkedin-blue relative">
            <div className="flex justify-between items-start mb-8 gap-6">
               <div>
-                 <h1 className="text-4xl font-extrabold text-linkedin-text leading-tight">{project.title}</h1>
-                 <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mt-2">POSTED {new Date(project.created_at).toLocaleDateString()}</p>
+                 <h1 className="text-4xl font-extrabold text-linkedin-text leading-tight">{project?.title}</h1>
+                 <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mt-2">{project?.created_at ? `POSTED ${new Date(project.created_at).toLocaleDateString()}` : 'DRAFT'}</p>
               </div>
-              <div className="px-5 py-2 rounded-full bg-blue-50 border border-blue-100 text-linkedin-blue text-[10px] font-black uppercase tracking-widest shadow-sm">{project.status}</div>
+              <div className="px-5 py-2 rounded-full bg-blue-50 border border-blue-100 text-linkedin-blue text-[10px] font-black uppercase tracking-widest shadow-sm">{project?.status}</div>
            </div>
-           <p className="text-gray-600 text-lg font-medium leading-[2] mb-12">{project.abstract}</p>
+           <p className="text-gray-600 text-lg font-medium leading-[2] mb-12">{project?.abstract}</p>
            {!isCreator && !isMember && (
               <Button size="lg" disabled={requestSent} onClick={handleJoinRequest} className="h-14 px-10 text-lg">
                  {requestSent ? <><CheckCircle className="w-5 h-5 mr-2" /> Request Sent</> : <><UserPlus className="w-5 h-5 mr-2" /> Request to Join Team</>}
@@ -227,16 +229,18 @@ export const TeamManagement = () => {
     const fetchTeamData = async () => {
       if(!user) return;
       try {
-          const p = await projectService.getById(id);
-          setProject(p);
-          setIsCreator(user?.id === p.created_by);
-          
-          const m = await teamService.getMembers(id);
-          setMembers(m);
-  
-          if (user?.id === p?.created_by) {
-             const r = await teamService.getJoinRequests(id);
-             setRequests(r);
+          const { data: p } = await projectService.getById(id);
+          if (p) {
+             setProject(p);
+             setIsCreator(user?.id === p.created_by);
+             
+             const { data: mems } = await teamService.getMembers(id);
+             if (mems) setMembers(mems);
+     
+             if (user?.id === p?.created_by) {
+                const { data: reqs } = await teamService.getJoinRequests(id);
+                if (reqs) setRequests(reqs);
+             }
           }
       } catch (e) { console.error(e); }
       setLoading(false);
@@ -250,11 +254,11 @@ export const TeamManagement = () => {
          } else {
             await teamService.handleRequest(requestId, 'rejected');
          }
-         fetchTeamData();
+         await fetchTeamData();
        } catch (e) { alert(e.message); }
     };
   
-    if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-12 h-12 text-linkedin-blue animate-spin" /></div>;
+    if (loading && !project) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-12 h-12 text-linkedin-blue animate-spin" /></div>;
   
     return (
       <div className="max-w-7xl mx-auto space-y-10 animate-fade-in-up pb-20">
@@ -276,7 +280,7 @@ export const TeamManagement = () => {
                               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter mt-1">{m.role_in_team}</p>
                            </div>
                         </div>
-                        {isCreator && m.user_id !== project.created_by && (
+                        {isCreator && m.user_id !== project?.created_by && (
                            <button className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"><UserMinus className="w-6 h-6" /></button>
                         )}
                      </div>

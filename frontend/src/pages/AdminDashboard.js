@@ -16,7 +16,7 @@ export const AdminDashboard = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const data = await projectService.getAll();
+    const { data } = await projectService.getAll();
     if (data) {
        setAllProjects(data);
        setPendingApprovals(data.filter(p => p.status === 'pending'));
