@@ -83,7 +83,7 @@ export const Navbar = () => {
                   {/* Premium Dropdown */}
                   <div className="absolute right-0 top-12 w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover/user:opacity-100 group-hover/user:visible transition-all py-4 z-[100] translate-y-2 group-hover/user:translate-y-0">
                      <div className="px-5 pb-4 mb-4 border-b border-gray-50 flex items-center gap-3">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} className="w-10 h-10 rounded-full bg-blue-50" />
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} className="w-10 h-10 rounded-full bg-blue-50" alt="User Profile" />
                         <div className="min-w-0">
                            <p className="font-bold text-sm text-linkedin-text truncate capitalize">{profile?.full_name || 'Innovator'}</p>
                            <p className="text-[10px] text-gray-400 font-bold uppercase truncate tracking-tighter">Student Account</p>

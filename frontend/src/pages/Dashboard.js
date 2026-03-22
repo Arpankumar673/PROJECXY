@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, TrendingUp, Users, ArrowRight, MessageSquare, ListTodo, Activity, 
-  Search, Loader2, CreditCard, CheckCircle2, Award, Zap, BookOpen, ShieldCheck, LayoutDashboard, Tag, Calendar, Rocket 
+  Loader2, CheckCircle2, Award, Zap, ShieldCheck, LayoutDashboard, Tag, Calendar, Rocket 
 } from 'lucide-react';
 import { Button, Card } from '../components/ui';
 import { projectService } from '../services/api';

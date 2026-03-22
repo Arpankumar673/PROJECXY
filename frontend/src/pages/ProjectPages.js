@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, CheckCircle, Clock, Users, ArrowLeft, Send, UserPlus, ShieldPlus, TrendingUp, Loader2, Check, X, UserMinus, Upload, FileText, ChevronRight } from 'lucide-react';
+import { Plus, CheckCircle, Clock, Users, ArrowLeft, UserPlus, TrendingUp, Loader2, UserMinus, Upload, FileText } from 'lucide-react';
 import { Button, Card, Input } from '../components/ui';
 import { supabase } from '../services/supabase';
 import { projectService, teamService, milestoneService, storageService } from '../services/api';
@@ -270,7 +270,7 @@ export const TeamManagement = () => {
                   {members.map(m => (
                      <div key={m.id} className="flex items-center justify-between p-6 bg-gray-50/50 rounded-3xl border border-gray-100 hover:border-blue-100 transition-all">
                         <div className="flex items-center gap-4 text-nowrap">
-                           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${m.user_id}`} className="w-14 h-14 rounded-2xl shadow-sm border border-white" />
+                           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${m.user_id}`} className="w-14 h-14 rounded-2xl shadow-sm border border-white" alt="Team Member" />
                            <div>
                               <p className="font-extrabold text-lg leading-tight truncate max-w-[150px]">{m.profiles?.full_name}</p>
                               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter mt-1">{m.role_in_team}</p>
@@ -291,7 +291,7 @@ export const TeamManagement = () => {
                      {requests.map(r => (
                         <Card key={r.id} className="p-8 border border-amber-100 bg-amber-50/10 hover:shadow-xl transition-all">
                            <div className="flex items-center gap-4 mb-6">
-                              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${r.user_id}`} className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-amber-100" />
+                              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${r.user_id}`} className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-amber-100" alt="Requester" />
                               <div className="flex-1 min-w-0">
                                  <p className="font-extrabold text-lg leading-tight truncate">{r.profiles?.full_name}</p>
                                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter mt-1">Aspiring Team Member</p>
