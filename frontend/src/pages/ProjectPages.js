@@ -12,59 +12,6 @@ import { projectService, teamService, milestoneService, storageService } from '.
 import { useAuth } from '../hooks/useAuth';
 import { KanbanBoard } from '../components/workspace/KanbanBoard';
 
-/**
- * 🎓 ONBOARDING PAGE
- * Modern set up for institutional identity.
- */
-export const OnboardingPage = () => {
-  const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
-  const [dept, setDept] = useState('');
-  const [batch, setBatch] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleOnboarding = async () => {
-    setLoading(true);
-    const { error } = await supabase.from('profiles').upsert({ 
-        id: user.id, 
-        full_name: user?.user_metadata?.full_name || 'Innovator',
-        role: 'student',
-        updated_at: new Date().toISOString(),
-        department: dept,
-        batch: batch
-    });
-    
-    if (!error) await refreshProfile(); 
-    setLoading(false);
-    navigate('/dashboard');
-  };
-
-  return (
-    <div className="min-h-screen bg-projecxy-bg flex items-center justify-center p-6 lg:p-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <Card className="max-w-4xl p-16 border-none shadow-soft relative group bg-white overflow-hidden rounded-[40px] border border-gray-100">
-         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity"><TrendingUp className="w-48 h-48" /></div>
-         <div className="flex flex-col md:flex-row gap-16 items-center">
-            <div className="w-full md:w-1/2 space-y-8">
-               <div className="space-y-2">
-                  <h1 className="text-4xl font-black text-projecxy-text leading-tight tracking-tighter">Welcome to Projecxy! 🎉</h1>
-                  <p className="text-projecxy-secondary font-bold text-lg leading-relaxed">Let's set up your institutional identity.</p>
-               </div>
-               <div className="space-y-6">
-                  <Input label="Select Department" placeholder="E.g. Computer Science" value={dept} onChange={(e) => setDept(e.target.value)} />
-                  <Input label="Student ID / Batch" placeholder="E.g. 2024-CSE-01" value={batch} onChange={(e) => setBatch(e.target.value)} />
-                  <Button className="w-full py-5 text-xl h-18 rounded-3xl uppercase tracking-widest font-black" onClick={handleOnboarding} disabled={loading}>
-                     {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Complete Setup'}
-                  </Button>
-               </div>
-            </div>
-            <div className="hidden md:flex w-1/2 flex-col items-center justify-center">
-               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} alt="User" className="w-[280px] h-[280px] rounded-[60px] border-[12px] border-blue-50 shadow-soft transform -rotate-3 transition-transform hover:rotate-0" />
-            </div>
-         </div>
-      </Card>
-    </div>
-  );
-};
 
 /**
  * 🏗️ CREATE PROJECT
