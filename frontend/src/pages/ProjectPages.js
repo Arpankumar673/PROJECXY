@@ -9,15 +9,25 @@ import { useAuth } from '../hooks/useAuth';
 // Onboarding Page
 export const OnboardingPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [dept, setDept] = useState('');
   const [batch, setBatch] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleOnboarding = async () => {
     setLoading(true);
-    const { error } = await supabase.from('profiles').update({ full_name: user?.user_metadata?.full_name }).eq('id', user.id);
-    if (error) console.error(error);
+    // 🏦 SECURE UPSERT ENGINE
+    // Ensures first-time Google users get a profile row while updating existing ones.
+    const { error } = await supabase.from('profiles').upsert({ 
+        id: user.id, 
+        full_name: user?.user_metadata?.full_name || 'New Innovator',
+        role: 'student', // Default role for discovery hub
+        updated_at: new Date().toISOString()
+    });
+    
+    if (error) console.error("DEBUG: Onboarding identity failure:", error.message);
+    else await refreshProfile(); // Ensure AuthContext sees the new profile
+    
     setLoading(false);
     navigate('/dashboard');
   };

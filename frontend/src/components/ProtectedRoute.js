@@ -14,7 +14,17 @@ export const ProtectedRoute = ({ children, role }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (role && profile?.role !== role) {
+  // 🛰️ ONBOARDING HANDOFF
+  // If the user is authenticated but lacks a profile role, port them to the identity terminal.
+  if (!profile?.role && !loading) {
+    // Only redirect if NOT already on the onboarding path (handled by App.js)
+    if (window.location.pathname !== '/onboarding') {
+       return <Navigate to="/onboarding" replace />;
+    }
+  }
+
+  // 👮 ROLE ENFORCEMENT
+  if (role && profile?.role && profile.role !== role) {
     return <Navigate to="/" replace />;
   }
 

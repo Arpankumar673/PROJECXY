@@ -104,8 +104,10 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
+    const refreshProfile = () => user && fetchProfile(user.id);
+
     return (
-        <AuthContext.Provider value={{ user, profile, loading, login, signup, logout, loginWithGoogle }}>
+        <AuthContext.Provider value={{ user, profile, loading, login, signup, logout, loginWithGoogle, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     );
