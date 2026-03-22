@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { Button, Card } from '../components/ui';
+import { Button, Card, cn } from '../components/ui';
 
 export const OnboardingPage = () => {
     const navigate = useNavigate();
