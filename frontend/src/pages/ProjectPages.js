@@ -4,7 +4,7 @@ import {
   Plus, CheckCircle2, Clock, Users, ArrowLeft, UserPlus, 
   TrendingUp, Loader2, UserMinus, Upload, FileText, 
   LayoutDashboard, Briefcase, Settings, MessageSquare, 
-  Calendar, Layers, ShieldCheck, Zap, Globe, Lock
+  Calendar, Layers, ShieldCheck, Zap, Globe, Lock, Rocket
 } from 'lucide-react';
 import { Button, Card, Input, cn } from '../components/ui';
 import { supabase } from '../services/supabase';
@@ -319,7 +319,6 @@ export const TeamManagement = ({ minimal = false }) => {
     const { user } = useAuth();
     const [members, setMembers] = useState([]);
     const [requests, setRequests] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [isCreator, setIsCreator] = useState(false);
   
     useEffect(() => {
@@ -340,7 +339,6 @@ export const TeamManagement = ({ minimal = false }) => {
              }
           }
       } catch (e) { console.error(e); }
-      setLoading(false);
     };
   
     return (

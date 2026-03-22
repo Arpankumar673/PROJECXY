@@ -5,7 +5,7 @@ import { projectService } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
 export const AdminDashboard = () => {
-  const { profile, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,14 +33,14 @@ export const AdminDashboard = () => {
     }
   };
 
-  if (authLoading || loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-12 h-12 text-linkedin-blue animate-spin" /></div>;
+  if (authLoading || loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="w-12 h-12 text-projecxy-blue animate-spin" /></div>;
 
   return (
     <div className="space-y-10 animate-fade-in-up">
         <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
            {[
               { label: 'Pending Approvals', value: pendingApprovals.length, icon: ShieldAlert, color: 'text-amber-500 bg-amber-50/50' },
-              { label: 'Total Projects', value: allProjects.length, icon: BarChart3, color: 'text-linkedin-blue bg-blue-50/50' },
+              { label: 'Total Projects', value: allProjects.length, icon: BarChart3, color: 'text-projecxy-blue bg-blue-50/50' },
               { label: 'Engagement Index', value: 'High', icon: Users, color: 'text-emerald-500 bg-emerald-50/50' },
               { label: 'Storage Sync', value: 'Live', icon: Database, color: 'text-purple-500 bg-purple-50/50' }
            ].map((stat, i) => (
@@ -48,8 +48,8 @@ export const AdminDashboard = () => {
                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-sm bg-white border border-opacity-10 border-black">
                     <stat.icon className="w-8 h-8" />
                  </div>
-                 <h4 className="text-3xl font-black text-linkedin-text mb-1">{stat.value}</h4>
-                 <p className="text-xs text-gray-500 font-bold uppercase tracking-widest leading-none">{stat.label}</p>
+                 <h4 className="text-3xl font-black text-projecxy-text mb-1">{stat.value}</h4>
+                 <p className="text-xs text-projecxy-secondary font-bold uppercase tracking-widest leading-none">{stat.label}</p>
               </Card>
            ))}
         </section>
@@ -64,7 +64,7 @@ export const AdminDashboard = () => {
                           <FileSearch className="w-7 h-7 text-amber-500" />
                           Approval Queue
                        </h2>
-                       <p className="text-gray-400 text-sm font-medium">Synced from department archives.</p>
+                       <p className="text-projecxy-secondary text-sm font-medium">Synced from department archives.</p>
                     </div>
                  </div>
                  
@@ -83,11 +83,11 @@ export const AdminDashboard = () => {
                          <tr key={p.id} className="group hover:bg-gray-50/50 transition-colors">
                            <td className="py-10">
                              <div className="flex flex-col">
-                                <span className="font-bold text-lg text-linkedin-text group-hover:text-linkedin-blue transition-colors mb-1">{p.title}</span>
-                                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">{p.id.slice(0,8)}</span>
+                                <span className="font-bold text-lg text-projecxy-text group-hover:text-projecxy-blue transition-colors mb-1">{p.title}</span>
+                                <span className="text-[10px] text-projecxy-secondary font-medium uppercase tracking-tight">{p.id.slice(0,8)}</span>
                              </div>
                            </td>
-                           <td className="py-10 text-sm font-semibold text-gray-600 truncate max-w-[150px]">{p.profiles?.full_name}</td>
+                           <td className="py-10 text-sm font-semibold text-gray-500 truncate max-w-[150px]">{p.profiles?.full_name}</td>
                            <td className="py-10 text-[10px] font-bold uppercase text-amber-500">{p.status}</td>
                            <td className="py-10">
                              <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export const AdminDashboard = () => {
                                <button onClick={() => handleStatusUpdate(p.id, 'rejected')} className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-100">
                                  <X className="w-5 h-5" />
                                </button>
-                               <button className="p-3 bg-blue-50 text-linkedin-blue rounded-xl hover:bg-linkedin-blue hover:text-white transition-all shadow-sm border border-blue-100">
+                               <button className="p-3 bg-blue-50 text-projecxy-blue rounded-xl hover:bg-projecxy-blue hover:text-white transition-all shadow-sm border border-blue-100">
                                   <Eye className="w-5 h-5" />
                                </button>
                              </div>
@@ -114,20 +114,20 @@ export const AdminDashboard = () => {
            </div>
            
            <div className="space-y-8">
-              <Card className="p-10 bg-[#1D2226] text-white border-none shadow-2xl relative group overflow-hidden">
+              <Card className="p-10 bg-projecxy-text text-white border-none shadow-2xl relative group overflow-hidden rounded-[40px]">
                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:translate-x-4 transition-transform"><Database className="w-32 h-32" /></div>
-                 <h3 className="font-black text-xs uppercase tracking-[0.2em] text-linkedin-blue mb-4">Innovation Index</h3>
-                 <p className="text-3xl font-black mb-8 leading-tight">Your department has <span className="text-linkedin-blue underline decoration-4 underline-offset-8 decoration-linkedin-blue/30">{allProjects.length} live</span> projects recorded.</p>
-                 <Button className="w-full bg-white text-linkedin-text hover:bg-gray-100 border-none h-14 font-black">Generate Report</Button>
+                 <h3 className="font-black text-xs uppercase tracking-[0.2em] text-projecxy-blue mb-4">Innovation Index</h3>
+                 <p className="text-3xl font-black mb-8 leading-tight">Your department has <span className="text-projecxy-blue underline decoration-4 underline-offset-8 decoration-projecxy-blue/30">{allProjects.length} live</span> projects recorded.</p>
+                 <Button className="w-full bg-white text-projecxy-text hover:bg-gray-100 border-none h-14 font-black">Generate Report</Button>
               </Card>
 
               <section className="bg-white p-8 rounded-3xl shadow-card border border-gray-100">
                   <div className="flex justify-between items-center mb-8">
-                     <h3 className="font-black text-xl flex items-center gap-2"><Download className="w-6 h-6 text-linkedin-blue" /> Quick Tools</h3>
+                     <h3 className="font-black text-xl flex items-center gap-2 tracking-tighter uppercase"><Download className="w-6 h-6 text-projecxy-blue" /> Quick Tools</h3>
                   </div>
                   <div className="space-y-4">
                      {['Bulk Approve', 'Export Master CSV', 'Generate Statistics', 'Archive Session'].map((tool, i) => (
-                        <button key={i} className="w-full p-4 text-left font-bold text-sm text-gray-600 hover:bg-blue-50 hover:text-linkedin-blue rounded-xl border border-transparent hover:border-blue-100 transition-all flex justify-between items-center group">
+                        <button key={i} className="w-full p-4 text-left font-bold text-xs uppercase tracking-widest text-projecxy-secondary hover:bg-blue-50 hover:text-projecxy-blue rounded-xl border border-transparent hover:border-blue-100 transition-all flex justify-between items-center group">
                            {tool}
                            <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all" />
                         </button>

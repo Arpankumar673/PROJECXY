@@ -23,7 +23,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-linkedin-bg text-linkedin-text font-sans flex flex-col selection:bg-blue-100 selection:text-linkedin-blue">
+        <div className="min-h-screen bg-projecxy-bg text-projecxy-text font-sans flex flex-col selection:bg-blue-100 selection:text-projecxy-blue">
           <Routes>
             {/* 🌐 CLEAR VISITOR ROUTES (No Sidebar) */}
             <Route path="/" element={<LandingPage />} />

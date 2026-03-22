@@ -41,10 +41,10 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white md:bg-linkedin-bg flex items-center justify-center py-12 px-4 animate-fade-in">
+    <div className="min-h-screen bg-white md:bg-projecxy-bg flex items-center justify-center py-12 px-4 animate-fade-in">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center group cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-linkedin-blue mx-auto mb-6 group-hover:scale-110 transition-transform shadow-sm">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-projecxy-blue mx-auto mb-6 group-hover:scale-110 transition-transform shadow-sm">
              <Rocket className="w-8 h-8" />
           </div>
           <h2 className="text-3xl font-extrabold text-[#1D2226]">Sign in</h2>
@@ -55,7 +55,7 @@ export const LoginPage = () => {
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-xs font-bold border border-red-100">{error}</div>}
           <Input label="Email address" type="email" placeholder="jack@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} />
           <div className="space-y-1">
-             <div className="flex justify-between items-center"><label className="text-sm font-medium">Password</label><a href="#" className="text-xs text-linkedin-blue font-bold hover:underline">Forgot?</a></div>
+             <div className="flex justify-between items-center"><label className="text-sm font-medium">Password</label><a href="#" className="text-xs text-projecxy-blue font-bold hover:underline">Forgot?</a></div>
              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <Button size="lg" className="w-full text-lg py-4" onClick={handleLogin} disabled={loading}>
@@ -71,7 +71,7 @@ export const LoginPage = () => {
         </Card>
         
         <p className="text-center text-gray-600 text-sm font-medium">
-          New to Projecxy? <Link to="/signup" className="text-linkedin-blue font-bold hover:underline">Join now</Link>
+          New to Projecxy? <Link to="/signup" className="text-projecxy-blue font-bold hover:underline">Join now</Link>
         </p>
       </div>
     </div>
@@ -105,10 +105,10 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white md:bg-linkedin-bg flex items-center justify-center py-12 px-4 animate-fade-in">
+    <div className="min-h-screen bg-white md:bg-projecxy-bg flex items-center justify-center py-12 px-4 animate-fade-in">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center group cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-linkedin-blue mx-auto mb-6 group-hover:scale-110 transition-transform shadow-sm">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-projecxy-blue mx-auto mb-6 group-hover:scale-110 transition-transform shadow-sm">
              <Rocket className="w-8 h-8" />
           </div>
           <h2 className="text-3xl font-extrabold text-[#1D2226]">Create Account</h2>
@@ -117,15 +117,15 @@ export const SignupPage = () => {
 
         <Card className="p-8 border border-gray-100 shadow-xl bg-white overflow-hidden relative">
           <div className="flex mb-8 gap-2">
-            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-linkedin-blue' : 'bg-gray-100'}`}></div>
-            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-linkedin-blue' : 'bg-gray-100'}`}></div>
+            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-projecxy-blue' : 'bg-gray-100'}`}></div>
+            <div className={`h-1 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-projecxy-blue' : 'bg-gray-100'}`}></div>
           </div>
 
           {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-bold border border-red-100 mb-6">{error}</div>}
 
           {step === 1 ? (
             <div className="space-y-6 animate-fade-in-right">
-              <h3 className="text-lg font-black text-linkedin-text">I am a...</h3>
+              <h3 className="text-lg font-black text-projecxy-text">I am a...</h3>
               <div className="grid grid-cols-1 gap-4">
                 {[
                   { id: 'student', label: 'Student', icon: GraduationCap, desc: 'Building & contributing to projects.' },
@@ -134,13 +134,13 @@ export const SignupPage = () => {
                   <button
                     key={r.id}
                     onClick={() => setRole(r.id)}
-                    className={`flex items-start gap-4 p-5 rounded-2xl border-2 transition-all text-left group ${role === r.id ? 'border-linkedin-blue bg-blue-50' : 'border-gray-50 hover:border-blue-100'}`}
+                    className={`flex items-start gap-4 p-5 rounded-2xl border-2 transition-all text-left group ${role === r.id ? 'border-projecxy-blue bg-blue-50' : 'border-gray-50 hover:border-blue-100'}`}
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${role === r.id ? 'bg-linkedin-blue text-white' : 'bg-gray-50 text-gray-400 group-hover:text-linkedin-blue'}`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${role === r.id ? 'bg-projecxy-blue text-white' : 'bg-gray-50 text-gray-400 group-hover:text-projecxy-blue'}`}>
                       <r.icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className={`font-bold ${role === r.id ? 'text-linkedin-blue' : 'text-linkedin-text'}`}>{r.label}</p>
+                      <p className={`font-bold ${role === r.id ? 'text-projecxy-blue' : 'text-projecxy-text'}`}>{r.label}</p>
                       <p className="text-xs text-gray-400 font-medium uppercase tracking-widest mt-0.5">{r.desc}</p>
                     </div>
                   </button>
@@ -166,7 +166,7 @@ export const SignupPage = () => {
         </Card>
 
         <p className="text-center text-gray-600 text-sm font-medium">
-          Already have an account? <Link to="/login" className="text-linkedin-blue font-bold hover:underline">Sign in</Link>
+          Already have an account? <Link to="/login" className="text-projecxy-blue font-bold hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
