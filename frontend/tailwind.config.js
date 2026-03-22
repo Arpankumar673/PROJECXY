@@ -5,22 +5,20 @@ module.exports = {
     extend: {
       colors: {
         'projecxy-blue': '#0A84FF',
-        'projecxy-bg': '#F8FAFC',
-        'projecxy-text': '#0F172A',
-        'projecxy-secondary': '#64748B',
-        'linkedin-blue': '#0A84FF', // Transitioning to Projecxy Blue
-        'linkedin-bg': '#F8FAFC',
-        'linkedin-text': '#0F172A',
-        'linkedin-hover': '#0070E0',
+        'projecxy-dark': '#050505',
+        'projecxy-card': '#0F1214',
+        'projecxy-border': 'rgba(255,255,255,0.06)',
+        'projecxy-text': '#FFFFFF',
+        'projecxy-secondary': '#888888',
       },
       borderRadius: {
-        'xl': '12px',
-        '2xl': '16px',
-        '3xl': '24px',
-        '4xl': '32px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '24px',
+        '3xl': '32px',
       },
       boxShadow: {
-        'card': '0 0 0 1px rgba(0,0,0,0.05), 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)',
+        'linear': '0 0 0 1px rgba(255,255,255,0.05), 0 12px 24px -12px rgba(0,0,0,0.5)',
         'soft': '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)',
       }
     },
