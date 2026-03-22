@@ -4,52 +4,58 @@ import { supabase } from './supabase';
  * 📊 PROJECT SERVICE
  */
 export const projectService = {
-  async createProject(projectData) {
+  async create(projectData) {
     const { data: { user } } = await supabase.auth.getUser();
     
-    // Auto-fetch department for MVP
-    const { data: depts } = await supabase.from('departments').select('id').limit(1);
+    // Auto-fetch department for MVP if not specified
+    let departmentId = projectData.department_id;
+    if (!departmentId) {
+       const { data: depts } = await supabase.from('departments').select('id').limit(1);
+       departmentId = depts?.[0]?.id;
+    }
     
     const finalData = { 
         ...projectData, 
         created_by: user?.id, 
-        department_id: depts?.[0]?.id 
+        department_id: departmentId 
     };
 
-    const result = await supabase.from('projects').insert([finalData]).select().single();
-    
-    // Auto-add creator as Lead if successful
-    if (!result.error && result.data) {
-        await supabase.from('project_members').insert([
-            { project_id: result.data.id, user_id: user.id, role_in_team: 'Lead' }
-        ]);
-    }
-
-    return result;
+    return await supabase.from('projects').insert([finalData]).select().single();
   },
 
-  async getProjects() {
-    return await supabase
+  async getAll() {
+    const { data, error } = await supabase
         .from('projects')
         .select('*, profiles(full_name)')
         .order('created_at', { ascending: false });
+    return data || []; // Return raw data to match component expectation
   },
 
-  async getProjectById(id) {
-    return await supabase
+  async getProjects() {
+     // Alias for getAll used in dashboard
+     return await this.getAll();
+  },
+
+  async getById(id) {
+    const { data } = await supabase
         .from('projects')
         .select('*, profiles(*)')
         .eq('id', id)
         .single();
+    return data;
   },
 
-  async updateProject(id, updateData) {
+  async update(id, updateData) {
     return await supabase
         .from('projects')
         .update(updateData)
         .eq('id', id)
         .select()
         .single();
+  },
+
+  async updateStatus(id, status) {
+     return await this.update(id, { status });
   }
 };
 
@@ -57,42 +63,31 @@ export const projectService = {
  * 👥 TEAM SERVICE
  */
 export const teamService = {
-  async sendJoinRequest(projectId, userId, message) {
-    return await supabase
-        .from('join_requests')
-        .insert([{ project_id: projectId, user_id: userId, message }])
-        .select()
-        .single();
+  async addMember(projectId, userId, role = 'Member') {
+    return await supabase.from('project_members').insert([
+        { project_id: projectId, user_id: userId, role_in_team: role }
+    ]).select().single();
+  },
+
+  async getMembers(projectId) {
+     const { data } = await supabase
+        .from('project_members')
+        .select('*, profiles(*)')
+        .eq('project_id', projectId);
+     return data || [];
   },
 
   async getJoinRequests(projectId) {
-    return await supabase
+    const { data } = await supabase
         .from('join_requests')
         .select('*, profiles(*)')
         .eq('project_id', projectId)
         .eq('status', 'pending');
+    return data || [];
   },
 
-  async acceptRequest(requestId) {
-     // Get request data first to move to members
-     const { data: req } = await supabase.from('join_requests').select('*').eq('id', requestId).single();
-     if (req) {
-         await supabase.from('project_members').insert([
-             { project_id: req.project_id, user_id: req.user_id, role_in_team: 'Member' }
-         ]);
-     }
-     return await supabase.from('join_requests').update({ status: 'accepted' }).eq('id', requestId).select().single();
-  },
-
-  async rejectRequest(requestId) {
-     return await supabase.from('join_requests').update({ status: 'rejected' }).eq('id', requestId).select().single();
-  },
-
-  async getProjectMembers(projectId) {
-     return await supabase
-        .from('project_members')
-        .select('*, profiles(*)')
-        .eq('project_id', projectId);
+  async handleRequest(requestId, status) {
+     return await supabase.from('join_requests').update({ status }).eq('id', requestId).select().single();
   }
 };
 
@@ -100,20 +95,17 @@ export const teamService = {
  * 📅 MILESTONE SERVICE
  */
 export const milestoneService = {
-  async createMilestone(milestoneData) {
-    return await supabase.from('milestones').insert([milestoneData]).select().single();
-  },
-
-  async getMilestones(projectId) {
-    return await supabase
+  async getByProject(projectId) {
+    const { data } = await supabase
         .from('milestones')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: true });
+    return data || [];
   },
 
-  async updateMilestone(id, updateData) {
-    return await supabase.from('milestones').update(updateData).eq('id', id).select().single();
+  async complete(id, fileUrl) {
+    return await supabase.from('milestones').update({ status: 'completed', file_url: fileUrl }).eq('id', id).select().single();
   }
 };
 
@@ -121,11 +113,12 @@ export const milestoneService = {
  * 📂 STORAGE SERVICE
  */
 export const storageService = {
-  async uploadFile(file, path) {
-    return await supabase.storage.from('project-assets').upload(path, file);
-  },
-
-  async getPublicUrl(path) {
-    return await supabase.storage.from('project-assets').getPublicUrl(path);
+  async uploadFile(bucket, path, file) {
+    const { error } = await supabase.storage.from(bucket).upload(path, file);
+    if (error) throw error;
+    
+    // Auto-resolve public URL
+    const { data: { publicUrl } } = await supabase.storage.from(bucket).getPublicUrl(path);
+    return publicUrl;
   }
 };
