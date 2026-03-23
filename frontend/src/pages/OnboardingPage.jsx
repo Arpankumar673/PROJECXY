@@ -85,7 +85,7 @@ export const OnboardingPage = () => {
             console.log("Watchdog Pulse: Still waiting for PostgreSQL response...");
         }, 2000);
 
-        try {
+        const executeSync = async () => {
             const profileData = {
                 id: userId,
                 full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Hub Innovator",
@@ -96,26 +96,48 @@ export const OnboardingPage = () => {
                 updated_at: new Date().toISOString()
             };
 
-            console.log("PostgreSQL Hub Sync: Initiating Split-Sync Strategy...");
+            console.log("PostgreSQL Hub Sync: Initiating Anchor Handshake...");
 
-            // 1. ATTEMPT INSERT FIRST (Identity Anchor)
-            const { error: insertError } = await supabase
-                .from("profiles")
-                .insert([profileData]);
-
-            if (insertError && insertError.code === '23505') {
-                console.log("Identity Already Anchored. Executing Matrix Update...");
-                // 2. IF EXISTS, PERFORM UPDATE
-                const { error: updateError } = await supabase
+            // 🛡️ RACE WRAPPER: Timeout and Retry to bypass Cold Start hangs
+            const syncPromise = (async () => {
+                // 1. ATTEMPT INSERT
+                const { error: insertError } = await supabase
                     .from("profiles")
-                    .update(profileData)
-                    .eq('id', userId);
+                    .insert([profileData]);
 
-                if (updateError) throw updateError;
-            } else if (insertError) {
-                throw insertError;
+                if (insertError && insertError.code === '23505') {
+                    console.log("Hub Sync: Primary Anchor Exists. Updating Matrix...");
+                    // 2. IF EXISTS, PERFORM UPDATE
+                    const { error: updateError } = await supabase
+                        .from("profiles")
+                        .update(profileData)
+                        .eq('id', userId);
+
+                    if (updateError) throw updateError;
+                } else if (insertError) {
+                    throw insertError;
+                }
+                return true;
+            })();
+
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("HUB_TIMEOUT")), 4000)
+            );
+
+            try {
+                return await Promise.race([syncPromise, timeoutPromise]);
+            } catch (err) {
+                if (err.message === "HUB_TIMEOUT") {
+                    console.warn("Hub Handshake Delayed: Initiating Re-Sync Pulse...");
+                    // RETRY ONCE
+                    return await syncPromise;
+                }
+                throw err;
             }
+        };
 
+        try {
+            await executeSync();
             console.log("Anchoring Successful. Terminating Pulse.");
             clearInterval(pulseInterval);
 
@@ -126,7 +148,7 @@ export const OnboardingPage = () => {
         } catch (err) {
             clearInterval(pulseInterval);
             console.error("Critical Synchronization Failure:", err);
-            alert("Hub Synchronization Failed: " + (err.message || "Unknown connectivity error"));
+            alert("Identity Hub Timeout: The database is taking too long to respond. This usually means your Vercel URL needs to be added to Allowed Origins in Supabase Settings -> API.");
         } finally {
             setLoading(false);
         }
