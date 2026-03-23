@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Rocket, Loader2, ChevronRight, 
-  Building2, Hash, AlertCircle, CheckCircle2
+  Building2, Hash, AlertCircle, CheckCircle2,
+  ChevronDown, GraduationCap
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -14,16 +15,40 @@ export const OnboardingPage = () => {
     const { user, profile, refreshProfile } = useAuth();
     
     const [department, setDepartment] = useState('');
+    const [branch, setBranch] = useState('');
     const [rollNo, setRollNo] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+
+    const departments = [
+        "Computer Science",
+        "IT",
+        "Mechanical",
+        "Civil",
+        "Biotech",
+        "Agriculture"
+    ];
+
+    const csBranches = [
+        "AI ML",
+        "Cyber Security",
+        "CSE Core",
+        "Data Science"
+    ];
 
     useEffect(() => {
         if (profile?.onboarding_completed) {
             navigate('/dashboard');
         }
     }, [profile, navigate]);
+
+    // Cleanup branch if department changes
+    useEffect(() => {
+        if (department !== "Computer Science") {
+            setBranch('');
+        }
+    }, [department]);
 
     const checkUniqueness = async (number) => {
         try {
@@ -34,10 +59,10 @@ export const OnboardingPage = () => {
                 .maybeSingle();
             
             if (error) throw error;
-            return !data; // Returns true if unique
+            return !data; 
         } catch (err) {
             console.error("Check uniqueness failure:", err);
-            return true; // Proceed if check fails but log it
+            return true; 
         }
     };
 
@@ -45,25 +70,30 @@ export const OnboardingPage = () => {
         e.preventDefault();
         setError(null);
         
-        if (!rollNo.trim() || !department.trim()) {
-            setError("All fields are required.");
+        // Validation
+        if (!rollNo.trim() || !department) {
+            setError("All mandatory fields are required.");
+            return;
+        }
+
+        if (department === "Computer Science" && !branch) {
+            setError("Please select your specialized branch.");
             return;
         }
 
         setLoading(true);
 
         try {
-            // 🔒 Uniqueness Verification
             const isUnique = await checkUniqueness(rollNo);
             if (!isUnique) {
                 throw new Error("This Roll Number is already registered");
             }
 
-            // 🧠 Save Identity Data
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update({
-                    department: department.trim(),
+                    department: department,
+                    branch: branch || null,
                     roll_no: rollNo.toUpperCase().trim(),
                     onboarding_completed: true,
                     updated_at: new Date().toISOString()
@@ -75,7 +105,6 @@ export const OnboardingPage = () => {
             setSuccess(true);
             await refreshProfile();
             
-            // 🚢 Smooth Transition to Workspace
             setTimeout(() => {
                 navigate('/dashboard');
             }, 1500);
@@ -99,12 +128,11 @@ export const OnboardingPage = () => {
             <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full max-w-xl relative z-10"
             >
                 <div className="mb-12 text-center space-y-3">
-                    <div className="w-20 h-20 bg-blue-50 text-projecxy-blue rounded-[32px] flex items-center justify-center border border-blue-100 shadow-soft mx-auto group hover:scale-105 transition-transform duration-500">
-                        <Rocket className="w-10 h-10 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                    <div className="w-20 h-20 bg-blue-50 text-projecxy-blue rounded-[32px] flex items-center justify-center border border-blue-100 shadow-soft mx-auto group">
+                        <Rocket className="w-10 h-10 group-hover:-translate-y-1 transition-transform" />
                     </div>
                     <h1 className="text-4xl font-black text-projecxy-text tracking-tighter uppercase">Initialize Identity</h1>
                     <p className="text-projecxy-secondary font-bold text-sm uppercase tracking-widest opacity-60">Campus OS Protocol Hub</p>
@@ -113,22 +141,58 @@ export const OnboardingPage = () => {
                 <Card className="p-10 md:p-14 bg-white rounded-[48px] shadow-soft border border-gray-100 overflow-hidden relative group">
                     <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000"><Building2 className="w-64 h-64" /></div>
                     
-                    <form onSubmit={handleOnboarding} className="space-y-10 relative z-10">
-                        <div className="space-y-8">
+                    <form onSubmit={handleOnboarding} className="space-y-8 relative z-10">
+                        <div className="space-y-6">
+                            {/* Department Selection */}
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black uppercase text-projecxy-secondary tracking-[0.2em] pl-2">Institution Department</label>
-                                <div className="relative group/input">
-                                    <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within/input:text-projecxy-blue transition-colors" />
-                                    <input 
+                                <label className="text-[10px] font-black uppercase text-projecxy-secondary tracking-[0.2em] pl-2">Select Department</label>
+                                <div className="relative">
+                                    <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                                    <select 
                                         required
                                         value={department}
                                         onChange={(e) => setDepartment(e.target.value)}
-                                        placeholder="e.g. Computer Science"
-                                        className="w-full h-16 bg-gray-50 border border-transparent rounded-2xl pl-14 pr-6 text-projecxy-text font-bold focus:bg-white focus:border-projecxy-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-gray-300"
-                                    />
+                                        className="w-full h-16 bg-gray-50 border border-transparent rounded-2xl pl-14 pr-12 text-projecxy-text font-bold focus:bg-white focus:border-projecxy-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="" disabled>Choose Department</option>
+                                        {departments.map(dept => (
+                                            <option key={dept} value={dept}>{dept}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none" />
                                 </div>
                             </div>
 
+                            {/* Conditional Branch Selection */}
+                            <AnimatePresence>
+                                {department === "Computer Science" && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="space-y-3 overflow-hidden"
+                                    >
+                                        <label className="text-[10px] font-black uppercase text-projecxy-secondary tracking-[0.2em] pl-2">Branch Specialization</label>
+                                        <div className="relative">
+                                            <GraduationCap className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                                            <select 
+                                                required
+                                                value={branch}
+                                                onChange={(e) => setBranch(e.target.value)}
+                                                className="w-full h-16 bg-gray-50 border border-transparent rounded-2xl pl-14 pr-12 text-projecxy-text font-bold focus:bg-white focus:border-projecxy-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option value="" disabled>Select Branch</option>
+                                                {csBranches.map(b => (
+                                                    <option key={b} value={b}>{b}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none" />
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Roll Number Input */}
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black uppercase text-projecxy-secondary tracking-[0.2em] pl-2">Institution Roll Number</label>
                                 <div className="relative group/input">
@@ -155,14 +219,14 @@ export const OnboardingPage = () => {
 
                         <div className="pt-4">
                             {success ? (
-                                <div className="w-full h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs animate-in zoom-in-95 duration-300">
+                                <div className="w-full h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs">
                                     <CheckCircle2 className="w-6 h-6" /> Anchoring Successful!
                                 </div>
                             ) : (
                                 <Button 
                                     size="lg" 
                                     type="submit"
-                                    disabled={loading || !department || !rollNo}
+                                    disabled={loading || !department || !rollNo || (department === "Computer Science" && !branch)}
                                     className="w-full h-18 rounded-3xl text-lg font-black uppercase tracking-[0.15em] shadow-xl shadow-blue-100 flex items-center justify-center gap-3"
                                 >
                                     {loading ? (
