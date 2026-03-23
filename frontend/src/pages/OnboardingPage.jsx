@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Rocket, Loader2, ChevronRight, 
   Building2, Hash, AlertCircle, CheckCircle2
@@ -17,7 +17,6 @@ export const OnboardingPage = () => {
     const [rollNo, setRollNo] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [validationError, setValidationError] = useState(null);
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
@@ -26,54 +25,46 @@ export const OnboardingPage = () => {
         }
     }, [profile, navigate]);
 
-    // ✨ REAL-TIME VALIDATION
-    useEffect(() => {
-        if (!rollNo) {
-            setValidationError(null);
+    const checkUniqueness = async (number) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('roll_no')
+                .eq('roll_no', number.toUpperCase().trim())
+                .maybeSingle();
+            
+            if (error) throw error;
+            return !data; // Returns true if unique
+        } catch (err) {
+            console.error("Check uniqueness failure:", err);
+            return true; // Proceed if check fails but log it
+        }
+    };
+
+    const handleOnboarding = async (e) => {
+        e.preventDefault();
+        setError(null);
+        
+        if (!rollNo.trim() || !department.trim()) {
+            setError("All fields are required.");
             return;
         }
 
-        const rollRegex = /^[A-Za-z0-9-]+$/;
-        if (!rollRegex.test(rollNo)) {
-            setValidationError("Only letters, numbers, and dashes allowed");
-        } else if (rollNo.length < 5) {
-            setValidationError("Minimum 5 characters required");
-        } else if (rollNo.length > 20) {
-            setValidationError("Maximum 20 characters allowed");
-        } else if (/\s/.test(rollNo)) {
-            setValidationError("Spaces are not allowed");
-        } else {
-            setValidationError(null);
-        }
-    }, [rollNo]);
-
-    const checkUniqueness = async (number) => {
-        const { data } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('roll_no', number.toUpperCase())
-            .single();
-        return !data; 
-    };
-
-    const handleComplete = async (e) => {
-        e.preventDefault();
-        if (validationError) return;
-
         setLoading(true);
-        setError(null);
 
         try {
+            // 🔒 Uniqueness Verification
             const isUnique = await checkUniqueness(rollNo);
             if (!isUnique) {
                 throw new Error("This Roll Number is already registered");
             }
 
+            // 🧠 Save Identity Data
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update({
-                    department: department,
-                    roll_no: rollNo.toUpperCase(),
+                    department: department.trim(),
+                    roll_no: rollNo.toUpperCase().trim(),
                     onboarding_completed: true,
                     updated_at: new Date().toISOString()
                 })
@@ -83,7 +74,11 @@ export const OnboardingPage = () => {
 
             setSuccess(true);
             await refreshProfile();
-            setTimeout(() => navigate('/dashboard'), 1500);
+            
+            // 🚢 Smooth Transition to Workspace
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
 
         } catch (err) {
             setError(err.message);
@@ -93,103 +88,102 @@ export const OnboardingPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-projecxy-dark flex items-center justify-center p-6 selection:bg-projecxy-blue/30 font-sans relative">
+        <div className="min-h-screen bg-projecxy-bg flex items-center justify-center p-6 selection:bg-blue-100 selection:text-projecxy-blue">
             
-            {/* 🪐 CLEAN BACKGROUND */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-projecxy-blue/10 via-transparent to-transparent" />
+            {/* 🛸 DECORATIVE BACKGROUND */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+                <div className="absolute top-0 right-1/4 w-[60%] h-[60%] bg-blue-100 blur-[120px] rounded-full" />
+                <div className="absolute bottom-0 left-1/4 w-[60%] h-[60%] bg-indigo-50 blur-[120px] rounded-full" />
             </div>
 
             <motion.div 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md relative z-10"
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-xl relative z-10"
             >
-                <div className="mb-10 text-center">
-                    <div className="w-16 h-16 bg-projecxy-blue/10 rounded-2xl flex items-center justify-center text-projecxy-blue mx-auto mb-6 border border-projecxy-blue/20">
-                        <Rocket className="w-8 h-8 fill-projecxy-blue/10" />
+                <div className="mb-12 text-center space-y-3">
+                    <div className="w-20 h-20 bg-blue-50 text-projecxy-blue rounded-[32px] flex items-center justify-center border border-blue-100 shadow-soft mx-auto group hover:scale-105 transition-transform duration-500">
+                        <Rocket className="w-10 h-10 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <h1 className="text-2xl font-black text-white tracking-tight mb-2 uppercase">Complete Profile</h1>
-                    <p className="text-projecxy-secondary text-sm font-medium px-4">Initialize your institutional identity to unlock the workspace.</p>
+                    <h1 className="text-4xl font-black text-projecxy-text tracking-tighter uppercase">Initialize Identity</h1>
+                    <p className="text-projecxy-secondary font-bold text-sm uppercase tracking-widest opacity-60">Campus OS Protocol Hub</p>
                 </div>
 
-                <Card className="bg-projecxy-card border-white/[0.06] p-8 md:p-10 rounded-[32px] shadow-2xl relative overflow-hidden">
-                    <form onSubmit={handleComplete} className="space-y-6">
-                        <div className="space-y-5">
-                            {/* Department Field */}
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-projecxy-secondary uppercase tracking-widest pl-1">Department</label>
-                                <div className="relative group">
-                                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-projecxy-secondary group-focus-within:text-projecxy-blue transition-colors" />
+                <Card className="p-10 md:p-14 bg-white rounded-[48px] shadow-soft border border-gray-100 overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000"><Building2 className="w-64 h-64" /></div>
+                    
+                    <form onSubmit={handleOnboarding} className="space-y-10 relative z-10">
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase text-projecxy-secondary tracking-[0.2em] pl-2">Institution Department</label>
+                                <div className="relative group/input">
+                                    <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within/input:text-projecxy-blue transition-colors" />
                                     <input 
                                         required
                                         value={department}
                                         onChange={(e) => setDepartment(e.target.value)}
-                                        placeholder="Engineering / Arts / Science"
-                                        className="w-full h-12 bg-white/[0.03] border border-white/[0.08] rounded-xl pl-12 pr-4 text-white focus:ring-1 focus:ring-projecxy-blue focus:border-projecxy-blue outline-none transition-all placeholder:text-projecxy-secondary/50 text-sm"
+                                        placeholder="e.g. Computer Science"
+                                        className="w-full h-16 bg-gray-50 border border-transparent rounded-2xl pl-14 pr-6 text-projecxy-text font-bold focus:bg-white focus:border-projecxy-blue focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-gray-300"
                                     />
                                 </div>
                             </div>
 
-                            {/* Roll Number Field */}
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-projecxy-secondary uppercase tracking-widest pl-1">Roll Number</label>
-                                <div className="relative group">
-                                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-projecxy-secondary group-focus-within:text-projecxy-blue transition-colors" />
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase text-projecxy-secondary tracking-[0.2em] pl-2">Institution Roll Number</label>
+                                <div className="relative group/input">
+                                    <Hash className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within/input:text-projecxy-blue transition-colors" />
                                     <input 
                                         required
                                         value={rollNo}
                                         onChange={(e) => setRollNo(e.target.value)}
-                                        placeholder="e.g. 2024-CSE-01"
+                                        placeholder="e.g. 2024-CSE-001"
                                         className={cn(
-                                            "w-full h-12 bg-white/[0.03] border rounded-xl pl-12 pr-4 text-white focus:ring-1 outline-none transition-all placeholder:text-projecxy-secondary/50 text-sm",
-                                            validationError ? "border-red-500/50 focus:ring-red-500/30" : "border-white/[0.08] focus:ring-projecxy-blue focus:border-projecxy-blue"
+                                            "w-full h-16 bg-gray-50 border rounded-2xl pl-14 pr-6 text-projecxy-text font-bold outline-none transition-all placeholder:text-gray-300 focus:bg-white uppercase",
+                                            error ? "border-red-500/50 focus:ring-red-50" : "border-transparent focus:border-projecxy-blue focus:ring-4 focus:ring-blue-50"
                                         )}
                                     />
                                 </div>
-                                <AnimatePresence>
-                                    {validationError && (
-                                        <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="text-[10px] text-red-400 font-bold mt-1 pl-1">
-                                            {validationError}
-                                        </motion.p>
-                                    )}
-                                </AnimatePresence>
+                                {error && (
+                                    <motion.p initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="text-[10px] text-red-500 font-bold px-2 uppercase tracking-widest flex items-center gap-2">
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                        {error}
+                                    </motion.p>
+                                )}
                             </div>
                         </div>
 
-                        {error && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-xs font-bold">
-                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                {error}
-                            </div>
-                        )}
-
-                        {success && (
-                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3 text-emerald-400 text-xs font-bold">
-                                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                                Profile updated. Entering workspace...
-                            </div>
-                        )}
-
-                        <button 
-                            type="submit"
-                            disabled={loading || success || !!validationError || !department || !rollNo}
-                            className={cn(
-                                "w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2",
-                                (loading || success || !!validationError || !department || !rollNo)
-                                    ? "bg-white/10 text-white/40 cursor-not-allowed" 
-                                    : "bg-projecxy-blue text-white hover:brightness-110 active:scale-[0.98] shadow-lg shadow-projecxy-blue/20"
+                        <div className="pt-4">
+                            {success ? (
+                                <div className="w-full h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs animate-in zoom-in-95 duration-300">
+                                    <CheckCircle2 className="w-6 h-6" /> Anchoring Successful!
+                                </div>
+                            ) : (
+                                <Button 
+                                    size="lg" 
+                                    type="submit"
+                                    disabled={loading || !department || !rollNo}
+                                    className="w-full h-18 rounded-3xl text-lg font-black uppercase tracking-[0.15em] shadow-xl shadow-blue-100 flex items-center justify-center gap-3"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                            <span>Setting up...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            Complete Onboarding <ChevronRight className="w-6 h-6" />
+                                        </>
+                                    )}
+                                </Button>
                             )}
-                        >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Complete Onboarding</span>}
-                            {!loading && <ChevronRight className="w-4 h-4" />}
-                        </button>
+                        </div>
                     </form>
                 </Card>
 
-                <p className="mt-8 text-center text-projecxy-secondary text-[10px] font-bold uppercase tracking-[0.3em] opacity-40">
-                    Projecxy Identity Gateway
-                </p>
+                <div className="mt-12 text-center opacity-40">
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Innovation Protocol Secured &copy; 2026</p>
+                </div>
             </motion.div>
         </div>
     );

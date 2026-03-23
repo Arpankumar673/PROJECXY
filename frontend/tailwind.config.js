@@ -5,11 +5,12 @@ module.exports = {
     extend: {
       colors: {
         'projecxy-blue': '#0A84FF',
+        'projecxy-bg': '#F8FAFC',
+        'projecxy-text': '#0F172A',
+        'projecxy-secondary': '#64748B',
         'projecxy-dark': '#050505',
-        'projecxy-card': '#0F1214',
-        'projecxy-border': 'rgba(255,255,255,0.06)',
-        'projecxy-text': '#FFFFFF',
-        'projecxy-secondary': '#888888',
+        'projecxy-card': '#FFFFFF',
+        'projecxy-border': 'rgba(0,0,0,0.06)',
       },
       borderRadius: {
         'lg': '12px',
