@@ -73,60 +73,55 @@ export const OnboardingPage = () => {
         setLoading(true);
 
         try {
-            console.log("Onboarding Hub Status: COMMENCING...");
-            
-            // 🛡️ Fail-safe Timeout (5 seconds)
-            const timeout = setTimeout(() => {
-                setLoading(false);
-                alert("PROTOCOL TIMEOUT: The connection to Supabase is hanging. This usually indicates a CORS issue. Please verify that 'https://projectxy.vercel.app' is added to 'Allowed Origins' in your Supabase Dashboard -> Settings -> API.");
-            }, 5000);
+            console.log("Onboarding Synchro-Matrix: COMMENCING...");
+            console.log("ENV URL Check:", import.meta.env.VITE_SUPABASE_URL);
 
-            // 🔍 Identity Ledger Discovery
-            if (!user?.id) {
-                clearTimeout(timeout);
-                console.error("Critical Failure: Identity not discovered in Hub Context");
-                alert("Identity sync failed. Please re-authenticate.");
+            const { data: userData } = await supabase.auth.getUser();
+            const user = userData?.user;
+
+            if (!user) {
+                alert("Identity Protocol Failure: User not authenticated in Hub.");
                 setLoading(false);
                 return;
             }
 
-            console.log("Transmission Phase: Initiating PostgreSQL Synchronization...", { id: user.id, department, rollNo });
+            console.log("PostgreSQL Hub Sync: Initiating Upsert...", { id: user.id, department, rollNo });
 
-            // 🛰️ EXECUTE UPSERT (Identity Anchor)
             const { error: upsertError } = await supabase
                 .from("profiles")
                 .upsert({
                     id: user.id,
-                    full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Innovator Hub",
                     department,
                     branch: branch || null,
                     roll_number: rollNo.toUpperCase().trim(),
                     onboarding_completed: true,
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'id' });
-
-            clearTimeout(timeout); // Hub connection established successfully
+                }, { onConflict: "id" });
 
             if (upsertError) {
-                console.error("PostgreSQL Persistence Error:", upsertError);
+                console.error("DB Error Matrix:", upsertError);
                 alert("Institutional Hub Sync Error: " + upsertError.message);
             } else {
-                console.log("Onboarding Protocol Verified. Executing Hub Redirect...");
-                
-                // Final persistent pulse
-                await refreshProfile();
-                
-                // Use a hard redirect to ensure the global state is freshly provisioned
+                console.log("Anchoring Persistent Ledger Successful. Executing Terminal Redirect...");
+                // Success: Direct redirect as requested for Vite/Vercel functional stability
                 window.location.href = "/dashboard";
             }
         } catch (err) {
             console.error("Unexpected Hub Interruption:", err);
-            alert("Unexpected system failure: " + err.message);
+            alert("Protocol Interruption: " + err.message);
         } finally {
-            console.log("Onboarding Pulse Finalized.");
             setLoading(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="h-screen bg-projecxy-bg flex flex-col items-center justify-center space-y-6">
+                <Loader2 className="w-16 h-16 animate-spin text-projecxy-blue/20" />
+                <p className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-300">Synchronizing Institutional Registry...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-projecxy-bg flex items-center justify-center p-6 selection:bg-blue-100 selection:text-projecxy-blue">
