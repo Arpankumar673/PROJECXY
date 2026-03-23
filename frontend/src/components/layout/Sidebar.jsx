@@ -90,6 +90,10 @@ export const Sidebar = ({ isCollapsed }) => {
   const navigate = useNavigate();
   const { profile, logout } = useAuth();
 
+  const avatar = profile?.avatar_url 
+    ? profile.avatar_url 
+    : `https://ui-avatars.com/api/?name=${profile?.full_name || "Innovator"}&background=0A84FF&color=fff`;
+
   const menuGroups = [
     {
       label: 'Campus Hub',
@@ -117,6 +121,15 @@ export const Sidebar = ({ isCollapsed }) => {
     }
   ];
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      console.error("Logout transmission interrupt:", err);
+    }
+  };
+
   return (
     <aside className={cn(
       "h-full flex flex-col bg-projecxy-dark border-r border-projecxy-border transition-all duration-500 ease-in-out relative group/sidebar",
@@ -124,11 +137,11 @@ export const Sidebar = ({ isCollapsed }) => {
     )}>
       {/* 🚀 BRANDING */}
       <div className="p-6 mb-4 flex items-center gap-3">
-         <div className="w-9 h-9 rounded-xl bg-projecxy-blue flex items-center justify-center shadow-lg shadow-projecxy-blue/20">
+         <div className="w-9 h-9 rounded-xl bg-projecxy-blue flex items-center justify-center shadow-lg shadow-projecxy-blue/20 cursor-pointer" onClick={() => navigate('/dashboard')}>
             <Rocket className="w-5 h-5 text-white fill-current" />
          </div>
          {!isCollapsed && (
-           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="cursor-pointer" onClick={() => navigate('/dashboard')}>
               <h1 className="text-[18px] font-black tracking-tighter text-white">PROJECXY</h1>
               <p className="text-[9px] font-bold text-projecxy-blue tracking-[0.2em] -mt-1 uppercase">Central Hub</p>
            </motion.div>
@@ -160,8 +173,13 @@ export const Sidebar = ({ isCollapsed }) => {
       <div className="mt-auto p-4 border-t border-projecxy-border bg-white/[0.01]">
          {!isCollapsed ? (
            <div className="p-3 bg-white/[0.04] rounded-2xl border border-white/[0.06] flex items-center gap-3">
-              <div className="relative">
-                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name}`} className="w-10 h-10 rounded-xl border border-white/10" alt="avatar" />
+              <div className="relative cursor-pointer" onClick={() => navigate('/profile')}>
+                 <img 
+                    src={avatar} 
+                    className="w-10 h-10 rounded-xl border border-white/10 object-cover" 
+                    alt="avatar" 
+                    onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile?.full_name || "ID"}`}
+                 />
                  <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-projecxy-dark rounded-full" />
               </div>
               <div className="flex-1 min-w-0">
@@ -169,19 +187,29 @@ export const Sidebar = ({ isCollapsed }) => {
                  <p className="text-[9px] text-projecxy-secondary font-bold tracking-widest uppercase truncate">{profile?.department || 'Guest'}</p>
               </div>
               <button 
-                onClick={() => logout()}
+                onClick={handleLogout}
                 className="p-2 text-projecxy-secondary hover:text-red-400 transition-colors"
+                title="Secure Logout"
               >
                  <LogOut className="w-4 h-4" />
               </button>
            </div>
          ) : (
-           <button 
-             onClick={() => logout()}
-             className="w-full flex justify-center p-3 text-projecxy-secondary hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+           <div className="flex flex-col items-center gap-4">
+            <button 
+              onClick={() => navigate('/profile')}
+              className="relative"
             >
-              <LogOut className="w-5 h-5" />
-           </button>
+              <img src={avatar} className="w-10 h-10 rounded-xl border border-white/10" alt="avatar" />
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-projecxy-dark rounded-full" />
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="w-full flex justify-center p-3 text-projecxy-secondary hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+              >
+                <LogOut className="w-5 h-5" />
+            </button>
+           </div>
          )}
       </div>
     </aside>

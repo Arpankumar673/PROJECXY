@@ -9,18 +9,34 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async (userId) => {
+        if (!userId) return;
         try {
-            const { data: p, error } = await supabase
+            // Be resilient: first try selecting everything
+            let { data: p, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
                 .single();
+
+            // Fallback: If select '*' fails due to missing columns, try core identity fields only
             if (error) {
-                console.warn("DEBUG: Profile retrieval non-fatal error:", error.message);
+                console.warn("DEBUG: Initial profile fetch failed, trying mandatory fields:", error.message);
+                const { data: fallbackData, error: fallbackError } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, role')
+                    .eq('id', userId)
+                    .single();
+                
+                if (fallbackError) throw fallbackError;
+                p = fallbackData;
             }
-            if (p) setProfile(p);
+
+            if (p) {
+                setProfile(p);
+            }
         } catch (err) {
-            console.error("DEBUG: Profile fetch fatal error:", err);
+            console.error("CRITICAL: Profile engine failure:", err);
+            // Even if fetch fails, we don't nullify existing user session if it was previously set
         }
     };
 

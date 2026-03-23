@@ -36,16 +36,16 @@ const FeedCard = ({ project }) => {
     >
         <div className="flex justify-between items-start mb-4">
             <StatusBadge status={project.status} />
-            <button className="text-gray-300 hover:text-amber-400 transition-colors">
+            <button className="text-gray-300 hover:text-amber-400 transition-colors" onClick={(e) => e.stopPropagation()}>
                 <Bookmark className="w-5 h-5" />
             </button>
         </div>
 
         <h3 className="text-lg font-bold text-projecxy-text group-hover:text-projecxy-blue transition-colors mb-2 truncate">{project.title}</h3>
-        <p className="text-sm text-projecxy-secondary line-clamp-2 mb-4 leading-relaxed">{project.description || project.abstract}</p>
+        <p className="text-sm text-projecxy-secondary line-clamp-2 mb-4 leading-relaxed">{project.description || project.abstract || "No abstract provided for this institutional initiative."}</p>
         
         <div className="flex flex-wrap gap-2 mb-6">
-           {(project.tags || ['General']).map((tag, i) => (
+           {(project.tags || ['Innovation']).map((tag, i) => (
               <span key={i} className="px-2 py-0.5 bg-gray-50 text-projecxy-secondary text-[10px] font-bold uppercase rounded-md border border-gray-100">
                  {tag}
               </span>
@@ -56,10 +56,16 @@ const FeedCard = ({ project }) => {
           <div className="flex items-center gap-2">
              <div className="flex -space-x-2">
                 {[1, 2].map(i => (
-                  <img key={i} src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + project.id}`} className="w-7 h-7 rounded-lg ring-2 ring-white border border-gray-100" alt="avatar" />
+                  <img 
+                    key={i} 
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + (project.id || 'seed')}`} 
+                    className="w-7 h-7 rounded-lg ring-2 ring-white border border-gray-100" 
+                    alt="avatar" 
+                    onError={(e) => e.target.src = 'https://ui-avatars.com/api/?background=random'}
+                  />
                 ))}
              </div>
-             <p className="text-[10px] text-projecxy-secondary font-bold uppercase tracking-tight">Active Team</p>
+             <p className="text-[10px] text-projecxy-secondary font-bold uppercase tracking-tight">Active Hub</p>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-projecxy-blue transform group-hover:translate-x-1 transition-all" />
         </div>
@@ -69,17 +75,17 @@ const FeedCard = ({ project }) => {
 
 export const Dashboard = () => {
     const navigate = useNavigate();
-    const { user, profile } = useAuth();
-    const { projects, myProjects, loading, error } = useProjects(user?.id);
+    const { user, profile, loading: authLoading } = useAuth();
+    const { projects, myProjects, loading: projectsLoading, error } = useProjects(user?.id);
     const [view, setView] = useState('campus_feed');
     const [search, setSearch] = useState('');
 
-    const filteredProjects = projects.filter(p => 
+    const filteredProjects = (projects || []).filter(p => 
         p.title?.toLowerCase().includes(search.toLowerCase()) || 
-        p.description?.toLowerCase().includes(search.toLowerCase())
+        (p.description || p.abstract)?.toLowerCase().includes(search.toLowerCase())
     );
 
-    if (loading) return (
+    if (authLoading || projectsLoading) return (
         <div className="h-[60vh] flex flex-col items-center justify-center gap-4 text-projecxy-secondary">
             <Loader2 className="w-10 h-10 animate-spin text-projecxy-blue" />
             <p className="text-xs font-black uppercase tracking-[0.2em]">Syncing Campus OS...</p>
@@ -89,7 +95,8 @@ export const Dashboard = () => {
     if (error) return (
         <div className="h-[60vh] flex flex-col items-center justify-center gap-4 text-red-500">
             <AlertCircle className="w-10 h-10" />
-            <p className="text-xs font-black uppercase tracking-[0.2em]">{error}</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em]">Synchronization Error: {error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline" size="sm">Retry Connection</Button>
         </div>
     );
 
@@ -103,7 +110,9 @@ export const Dashboard = () => {
                         Hi, {profile?.full_name?.split(' ')[0] || 'Innovator'}! 
                         <span className="text-2xl animate-bounce">🚀</span>
                     </h1>
-                    <p className="text-projecxy-secondary font-medium text-sm md:text-base">{profile?.department || 'Set your department'} Hub</p>
+                    <p className="text-projecxy-secondary font-medium text-sm md:text-base">
+                      {profile?.department || (profile?.onboarding_completed ? 'Campus Hub' : 'Identity Incomplete')}
+                    </p>
                 </div>
                 <Button size="lg" className="rounded-2xl h-14 px-8 uppercase tracking-widest text-[10px] font-black" onClick={() => navigate('/projects/new')}>
                     <Plus className="w-5 h-5 mr-3" /> Initiate Project
@@ -113,10 +122,10 @@ export const Dashboard = () => {
             {/* 📊 REAL-TIME STATS */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'Campus Projects', value: projects.length, icon: Rocket, color: 'text-blue-500' },
-                    { label: 'My Initiatives', value: myProjects.length, icon: Star, color: 'text-emerald-500' },
+                    { label: 'Campus Projects', value: projects?.length || 0, icon: Rocket, color: 'text-blue-500' },
+                    { label: 'My Initiatives', value: myProjects?.length || 0, icon: Star, color: 'text-emerald-500' },
                     { label: 'Network', value: 'Live', icon: Activity, color: 'text-amber-500' },
-                    { label: 'Points', value: '450', icon: Trophy, color: 'text-purple-500' }
+                    { label: 'Reputation', value: '450', icon: Trophy, color: 'text-purple-500' }
                 ].map((s, i) => (
                     <Card key={i} className="p-4 border-none shadow-soft flex items-center gap-4 bg-white rounded-2xl group cursor-default hover:bg-projecxy-blue/5 transition-all">
                         <div className={cn("w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center transition-transform group-hover:scale-110", s.color)}>
@@ -162,17 +171,17 @@ export const Dashboard = () => {
 
             {/* 🌪️ DYNAMIC FEED */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(view === 'campus_feed' ? filteredProjects : myProjects).map(p => (
+                {(view === 'campus_feed' ? filteredProjects : (myProjects || [])).map(p => (
                     <FeedCard key={p.id} project={p} />
                 ))}
                 
-                {(view === 'campus_feed' ? filteredProjects : myProjects).length === 0 && (
+                {(view === 'campus_feed' ? filteredProjects : (myProjects || [])).length === 0 && (
                     <div className="col-span-full py-20 text-center space-y-4">
                         <div className="w-16 h-16 bg-gray-50 rounded-[20px] mx-auto flex items-center justify-center text-gray-200">
                             <Plus className="w-8 h-8" />
                         </div>
                         <h3 className="font-black text-projecxy-text uppercase tracking-tight">No data discovered</h3>
-                        <p className="text-xs text-projecxy-secondary font-bold uppercase tracking-widest">Initiate the first project in your department</p>
+                        <p className="text-xs text-projecxy-secondary font-bold uppercase tracking-widest">Connect with department members to populate this hub</p>
                         <Button variant="outline" className="rounded-xl" onClick={() => navigate('/projects/new')}>Create New</Button>
                     </div>
                 )}

@@ -13,6 +13,10 @@ import { useAuth } from '../hooks/useAuth';
 export const ProfilePage = () => {
     const { user, profile } = useAuth();
 
+    const avatar = profile?.avatar_url 
+      ? profile.avatar_url 
+      : `https://ui-avatars.com/api/?name=${profile?.full_name || "Innovator"}&background=0A84FF&color=fff&size=512`;
+
     const skills = [
         "React", "Node.js", "TypeScript", "Python", 
         "Machine Learning", "System Design", "Firebase", 
@@ -25,6 +29,15 @@ export const ProfilePage = () => {
         { label: 'Accuracy Score', value: '98%', icon: ShieldCheck, bg: 'bg-emerald-50', color: 'text-emerald-500' },
         { label: 'Impact Rank', value: '#1', icon: Trophy, bg: 'bg-indigo-50', color: 'text-indigo-500' }
     ];
+
+    if (!profile && !user) return (
+      <div className="h-[80vh] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Activity className="w-12 h-12 text-projecxy-blue animate-pulse mx-auto" />
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-projecxy-secondary">Syncing Private Ledger...</p>
+        </div>
+      </div>
+    );
 
     return (
         <div className="max-w-7xl mx-auto py-10 px-4 animate-in fade-in slide-in-from-bottom-6 duration-1000 space-y-12">
@@ -39,9 +52,10 @@ export const ProfilePage = () => {
                     <div className="relative group">
                         <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-1000 rounded-full" />
                         <img 
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name || 'Innovator'}`} 
-                            className="w-40 h-40 md:w-56 md:h-56 rounded-[56px] border-[8px] md:border-[12px] border-white shadow-soft relative z-10 hover:scale-105 transition-transform duration-500" 
+                            src={avatar} 
+                            className="w-40 h-40 md:w-56 md:h-56 rounded-[56px] border-[8px] md:border-[12px] border-white shadow-soft relative z-10 hover:scale-105 transition-transform duration-500 object-cover" 
                             alt="Avatar"
+                            onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile?.full_name || "ID"}`}
                         />
                         <button className="absolute bottom-4 right-4 w-12 h-12 bg-projecxy-blue text-white rounded-2xl shadow-xl flex items-center justify-center border-4 border-white z-20 hover:scale-110 active:scale-95 transition-all">
                             <Plus className="w-5 h-5 mx-auto" />
@@ -50,25 +64,25 @@ export const ProfilePage = () => {
 
                     <div className="flex-1 text-center lg:text-left space-y-4 pb-6">
                         <div className="space-y-1">
-                            <h1 className="text-4xl md:text-6xl font-black text-projecxy-text tracking-tighter uppercase leading-none">{profile?.full_name || 'Arpan Kumar'}</h1>
-                            <p className="text-sm md:text-lg text-projecxy-secondary font-bold uppercase tracking-[0.3em] opacity-60">{profile?.department || 'Computer Science Engineering'}</p>
+                            <h1 className="text-4xl md:text-6xl font-black text-projecxy-text tracking-tighter uppercase leading-none">{profile?.full_name || 'Anonymous Innovator'}</h1>
+                            <p className="text-sm md:text-lg text-projecxy-secondary font-bold uppercase tracking-[0.3em] opacity-60">{profile?.department || 'Sector Unspecified'}</p>
                         </div>
                         <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
                             <div className="bg-emerald-50 text-emerald-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-emerald-100">
-                                <Activity className="w-4 h-4" /> Active Pulse: High
+                                <Activity className="w-4 h-4" /> Pulse: {profile?.onboarding_completed ? 'Authenticated' : 'Provisioning'}
                             </div>
                             <div className="bg-blue-50 text-projecxy-blue px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-blue-100">
-                                <ShieldCheck className="w-4 h-4" /> Originality Grade: A+
+                                <ShieldCheck className="w-4 h-4" /> Grade: High Tier
                             </div>
                         </div>
                     </div>
 
                     <div className="flex gap-4 pb-10">
                         <Button variant="outline" className="h-14 rounded-2xl px-8 border-gray-100 text-[10px] font-black uppercase tracking-widest shadow-soft hover:-translate-y-1 transition-all">
-                           <Share2 className="w-4 h-4 mr-2" /> Share Ledger
+                           <Share2 className="w-4 h-4 mr-2" /> Export Ledger
                         </Button>
                         <Button className="h-14 rounded-2xl px-10 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100 hover:-translate-y-1 transition-all">
-                           <Edit3 className="w-4 h-4 mr-2" /> Adjust Core
+                           <Edit3 className="w-4 h-4 mr-2" /> Modify Core
                         </Button>
                     </div>
                 </div>
@@ -93,7 +107,7 @@ export const ProfilePage = () => {
             <div className="grid lg:grid-cols-3 gap-8">
                 <Card className="p-10 lg:col-span-1 space-y-10 rounded-[48px] border-none shadow-soft bg-white group border border-gray-100 transition-all hover:shadow-xl">
                     <div className="space-y-2">
-                        <h3 className="text-xl font-black text-projecxy-text tracking-tighter uppercase leading-none">Authentication</h3>
+                        <h3 className="text-xl font-black text-projecxy-text tracking-tighter uppercase leading-none">Authorization</h3>
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 opacity-60 px-1 leading-tight">Verification Level 1</p>
                     </div>
                     <div className="space-y-6">
@@ -101,19 +115,19 @@ export const ProfilePage = () => {
                            <div className="w-10 h-10 bg-gray-50 flex items-center justify-center rounded-xl text-gray-300 group-hover/item:text-projecxy-blue transition-colors">
                               <Mail className="w-5 h-5" />
                            </div>
-                           <p className="text-sm font-bold text-projecxy-text">{user?.email || 'arpan@campus.os'}</p>
+                           <p className="text-sm font-bold text-projecxy-text truncate">{user?.email || 'identity@campus.os'}</p>
                         </div>
                         <div className="flex items-center gap-4 group/item">
                            <div className="w-10 h-10 bg-gray-50 flex items-center justify-center rounded-xl text-gray-300 group-hover/item:text-projecxy-blue transition-colors">
                               <Briefcase className="w-5 h-5" />
                            </div>
-                           <p className="text-sm font-bold text-projecxy-text">{profile?.role || 'Senior Contributor'}</p>
+                           <p className="text-sm font-bold text-projecxy-text">{profile?.role || 'Campus Member'}</p>
                         </div>
                         <div className="flex items-center gap-4 group/item">
                            <div className="w-10 h-10 bg-gray-50 flex items-center justify-center rounded-xl text-gray-300 group-hover/item:text-projecxy-blue transition-colors">
                               <MapPin className="w-5 h-5" />
                            </div>
-                           <p className="text-sm font-bold text-projecxy-text">Main Hub Terminal</p>
+                           <p className="text-sm font-bold text-projecxy-text">{profile?.roll_no || 'Terminal Assigned'}</p>
                         </div>
                     </div>
                     
@@ -157,8 +171,8 @@ export const ProfilePage = () => {
                                         <Link className="w-4 h-4 text-gray-300 group-hover:text-projecxy-blue transition-colors" />
                                     </div>
                                     <div className="space-y-1">
-                                        <h4 className="font-black text-projecxy-text uppercase tracking-tight truncate">Institutional Data Mesh v2</h4>
-                                        <p className="text-[10px] font-black text-projecxy-secondary uppercase tracking-[0.2em] opacity-50">Deployed: Feb 2026</p>
+                                        <h4 className="font-black text-projecxy-text uppercase tracking-tight truncate">Institutional Initiative</h4>
+                                        <p className="text-[10px] font-black text-projecxy-secondary uppercase tracking-[0.2em] opacity-50">Deployed: {new Date().getFullYear()}</p>
                                     </div>
                                 </div>
                             ))}
