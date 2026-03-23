@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Rocket, Plus, Briefcase, 
   Layers, BarChart3, Trophy, User, Settings, 
   ChevronDown, Bell, LogOut, Search, Activity,
-  MessageSquare, Globe, Lock
+  MessageSquare, Globe, Lock, Shield
 } from 'lucide-react';
 import { cn } from '../ui';
+import { useAuth } from '../../hooks/useAuth';
 
 const SidebarItem = ({ item, isActive, isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,33 +20,32 @@ const SidebarItem = ({ item, isActive, isCollapsed }) => {
         to={item.path}
         onClick={(e) => {
           if (hasSubItems) {
-            e.preventDefault();
             setIsOpen(!isOpen);
           }
         }}
         className={cn(
-          "flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group relative",
+          "flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
           isActive 
-            ? "bg-white/[0.08] text-projecxy-blue shadow-linear" 
+            ? "bg-white/[0.08] text-projecxy-blue shadow-linear border border-white/[0.05]" 
             : "text-projecxy-secondary hover:bg-white/[0.04] hover:text-white"
         )}
       >
         <div className="flex items-center gap-3">
           <div className={cn(
-            "p-1.5 rounded-md transition-colors",
+            "p-1.5 rounded-lg transition-colors",
             isActive ? "bg-projecxy-blue/10 text-projecxy-blue" : "group-hover:text-projecxy-blue"
           )}>
             <item.icon className="w-4 h-4" />
           </div>
           {!isCollapsed && (
-            <span className="text-[13px] font-medium tracking-tight whitespace-nowrap">{item.name}</span>
+            <span className="text-[13px] font-bold tracking-tight whitespace-nowrap uppercase">{item.name}</span>
           )}
         </div>
         
         {!isCollapsed && (
           <div className="flex items-center gap-2">
             {item.badge && (
-              <span className="bg-projecxy-blue text-[10px] font-black px-1.5 py-0.5 rounded-full text-white">
+              <span className="bg-projecxy-blue text-[9px] font-black px-1.5 py-0.5 rounded-md text-white">
                 {item.badge}
               </span>
             )}
@@ -54,13 +54,6 @@ const SidebarItem = ({ item, isActive, isCollapsed }) => {
                 <ChevronDown className="w-3 h-3 opacity-40" />
               </motion.div>
             )}
-          </div>
-        )}
-
-        {/* Desktop Tooltip */}
-        {isCollapsed && (
-          <div className="absolute left-full ml-4 px-2 py-1 bg-black border border-white/10 rounded text-[10px] font-bold uppercase tracking-widest text-white opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-             {item.name}
           </div>
         )}
       </NavLink>
@@ -78,8 +71,8 @@ const SidebarItem = ({ item, isActive, isCollapsed }) => {
                 key={idx}
                 to={sub.path}
                 className={({ isActive }) => cn(
-                  "block py-1.5 text-[12px] font-medium transition-colors",
-                  isActive ? "text-projecxy-blue font-bold" : "text-projecxy-secondary hover:text-white"
+                  "block py-2 text-[11px] font-black uppercase tracking-widest transition-colors",
+                  isActive ? "text-projecxy-blue" : "text-projecxy-secondary/60 hover:text-white"
                 )}
               >
                 {sub.name}
@@ -94,36 +87,32 @@ const SidebarItem = ({ item, isActive, isCollapsed }) => {
 
 export const Sidebar = ({ isCollapsed }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile, logout } = useAuth();
 
   const menuGroups = [
     {
-      label: 'Core',
+      label: 'Campus Hub',
       items: [
-        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, subItems: [
-          { name: 'Overview', path: '/dashboard' },
-          { name: 'Statistics', path: '/dashboard' }
-        ]},
-        { name: 'Explore Hub', path: '/dashboard', icon: Rocket, badge: 12 },
-        { name: 'Create Initiative', path: '/projects/new', icon: Plus },
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Explore Hub', path: '/feed', icon: Rocket, badge: 'LIVE' },
+        { name: 'Inbound', path: '/inbox', icon: MessageSquare, badge: 12 },
+        { name: 'Status Center', path: '/alerts', icon: Bell },
       ]
     },
     {
       label: 'Workspace',
       items: [
-        { name: 'My Projects', path: '/dashboard', icon: Briefcase, subItems: [
-          { name: 'Active', path: '/dashboard' },
-          { name: 'Completed', path: '/dashboard' },
-          { name: 'Drafts', path: '/dashboard' }
-        ]},
-        { name: 'Workstation', path: '/projects/workspace', icon: Layers },
-        { name: 'Analytics', path: '/dashboard', icon: BarChart3 },
+        { name: 'Initiate', path: '/projects/new', icon: Plus },
+        { name: 'Active Stack', path: '/workspace', icon: Layers },
+        { name: 'Achievements', path: '/achievements', icon: Trophy },
       ]
     },
     {
-      label: 'Social',
+      label: 'Security',
       items: [
-        { name: 'Reputation', path: '/dashboard', icon: Trophy },
-        { name: 'Pilot Profile', path: '/onboarding', icon: User },
+        { name: 'Pilot Profile', path: '/profile', icon: User },
+        { name: 'Terminal Matrix', path: '/settings', icon: Settings },
       ]
     }
   ];
@@ -133,38 +122,25 @@ export const Sidebar = ({ isCollapsed }) => {
       "h-full flex flex-col bg-projecxy-dark border-r border-projecxy-border transition-all duration-500 ease-in-out relative group/sidebar",
       isCollapsed ? "w-20" : "w-64"
     )}>
-      {/* 🚀 LOGO SECTION */}
-      <div className="p-6 mb-4">
-        <div className="flex items-center gap-3">
-           <div className="w-8 h-8 rounded-lg bg-projecxy-blue flex items-center justify-center shadow-lg shadow-projecxy-blue/20">
-              <Rocket className="w-5 h-5 text-white fill-current" />
-           </div>
-           {!isCollapsed && (
-             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h1 className="text-[17px] font-black tracking-tighter text-white">PROJECXY</h1>
-                <p className="text-[9px] font-bold text-projecxy-blue tracking-[0.2em] -mt-1 uppercase">Campus OS</p>
-             </motion.div>
-           )}
-        </div>
+      {/* 🚀 BRANDING */}
+      <div className="p-6 mb-4 flex items-center gap-3">
+         <div className="w-9 h-9 rounded-xl bg-projecxy-blue flex items-center justify-center shadow-lg shadow-projecxy-blue/20">
+            <Rocket className="w-5 h-5 text-white fill-current" />
+         </div>
+         {!isCollapsed && (
+           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <h1 className="text-[18px] font-black tracking-tighter text-white">PROJECXY</h1>
+              <p className="text-[9px] font-bold text-projecxy-blue tracking-[0.2em] -mt-1 uppercase">Central Hub</p>
+           </motion.div>
+         )}
       </div>
 
-      {/* 🔎 SEARCH PLACEHOLDER */}
-      {!isCollapsed && (
-        <div className="px-6 mb-8">
-           <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.04] rounded-lg border border-white/[0.06] text-projecxy-secondary hover:border-projecxy-blue/30 transition-all cursor-pointer">
-              <Search className="w-3.5 h-3.5" />
-              <span className="text-[11px] font-medium tracking-tight">Quick Search...</span>
-              <kbd className="ml-auto text-[10px] opacity-20 border border-white/20 px-1 rounded">⌘K</kbd>
-           </div>
-        </div>
-      )}
-
       {/* 🧭 NAVIGATION */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-8 scrollbar-hide pb-20">
+      <div className="flex-1 overflow-y-auto px-4 space-y-8 scrollbar-hide pb-20 pt-4">
         {menuGroups.map((group, idx) => (
           <div key={idx} className="space-y-3">
              {!isCollapsed && (
-               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-projecxy-secondary/40 pl-2">
+               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-projecxy-secondary/30 pl-3">
                  {group.label}
                </p>
              )}
@@ -180,24 +156,30 @@ export const Sidebar = ({ isCollapsed }) => {
         ))}
       </div>
 
-      {/* 👤 COLLAPSED LOGOUT */}
-      <div className="mt-auto p-4 border-t border-projecxy-border">
+      {/* 👤 BOTTOM IDENTITY */}
+      <div className="mt-auto p-4 border-t border-projecxy-border bg-white/[0.01]">
          {!isCollapsed ? (
-           <div className="p-3 bg-white/[0.04] rounded-xl border border-white/[0.06] group/user hover:border-projecxy-blue/20 transition-all cursor-pointer">
-              <div className="flex items-center gap-3">
-                 <div className="relative">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=pilot" className="w-10 h-10 rounded-lg border border-white/10" alt="avatar" />
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-projecxy-dark rounded-full" />
-                 </div>
-                 <div className="flex-1 min-w-0">
-                    <h4 className="text-[13px] font-bold text-white truncate">Pilot Admin</h4>
-                    <p className="text-[10px] text-projecxy-secondary font-medium tracking-tight truncate">PRO Member</p>
-                 </div>
-                 <Settings className="w-4 h-4 text-projecxy-secondary group-hover/user:text-projecxy-blue transition-colors" />
+           <div className="p-3 bg-white/[0.04] rounded-2xl border border-white/[0.06] flex items-center gap-3">
+              <div className="relative">
+                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name}`} className="w-10 h-10 rounded-xl border border-white/10" alt="avatar" />
+                 <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-projecxy-dark rounded-full" />
               </div>
+              <div className="flex-1 min-w-0">
+                 <h4 className="text-[13px] font-black text-white truncate">{profile?.full_name || 'Innovator'}</h4>
+                 <p className="text-[9px] text-projecxy-secondary font-bold tracking-widest uppercase truncate">{profile?.department || 'Guest'}</p>
+              </div>
+              <button 
+                onClick={() => logout()}
+                className="p-2 text-projecxy-secondary hover:text-red-400 transition-colors"
+              >
+                 <LogOut className="w-4 h-4" />
+              </button>
            </div>
          ) : (
-           <button className="w-full flex justify-center p-3 text-projecxy-secondary hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all">
+           <button 
+             onClick={() => logout()}
+             className="w-full flex justify-center p-3 text-projecxy-secondary hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+            >
               <LogOut className="w-5 h-5" />
            </button>
          )}

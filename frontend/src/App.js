@@ -5,6 +5,12 @@ import { LoginPage, SignupPage } from './pages/AuthPages';
 import { CreateProject, ProjectDetails, TeamManagement } from './pages/ProjectPages';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { Dashboard } from './pages/Dashboard';
+import { FeedPage } from './pages/Feed';
+import { InboxPage } from './pages/Inbox';
+import { AlertsPage } from './pages/Alerts';
+import { AchievementsPage } from './pages/Achievements';
+import { ProfilePage } from './pages/Profile';
+import { SettingsPage } from './pages/Settings';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './hooks/useAuth';
@@ -36,35 +42,24 @@ function App() {
             
             {/* 🚢 AUTHENTICATED INNOVATION HUB (Sidebar Enabled) */}
             <Route element={<InnovationLayout />}>
-              <Route path="/dashboard" element={
-                <ProtectedRoute role="student">
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+              <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
+              <Route path="/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
+              <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               
-              <Route path="/admin" element={
-                <ProtectedRoute role="dept_admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } />
+              <Route path="/admin" element={<ProtectedRoute role="dept_admin"><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/projects/new" element={<ProtectedRoute><CreateProject /></ProtectedRoute>} />
+              <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
+              <Route path="/projects/:id/team" element={<ProtectedRoute><TeamManagement /></ProtectedRoute>} />
               
-              <Route path="/projects/new" element={
-                <ProtectedRoute role="student">
-                  <CreateProject />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/projects/:id" element={
-                <ProtectedRoute>
-                  <ProjectDetails />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/projects/:id/team" element={
-                <ProtectedRoute>
-                  <TeamManagement />
-                </ProtectedRoute>
-              } />
+              {/* Added Legacy Compatibility Routes */}
+              <Route path="/explore" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+              <Route path="/workspace" element={<ProtectedRoute><div className="p-10 font-black uppercase tracking-widest text-projecxy-secondary opacity-50">Industrial Workspace Terminal</div></ProtectedRoute>} />
+              <Route path="/projects" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/department" element={<ProtectedRoute><div className="p-10 font-black uppercase tracking-widest text-projecxy-secondary opacity-50">Department Repository Hub</div></ProtectedRoute>} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
