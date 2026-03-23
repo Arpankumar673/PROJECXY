@@ -72,46 +72,61 @@ export const OnboardingPage = () => {
         if (e) e.preventDefault();
         setLoading(true);
 
+        const userId = user?.id;
+        if (!userId) {
+            alert("Protocol Failure: Identity Hub missing. Please re-login.");
+            setLoading(false);
+            return;
+        }
+
+        console.log("Onboarding Synchro-Matrix: COMMENCING...");
+        
+        let pulseInterval = setInterval(() => {
+            console.log("Watchdog Pulse: Still waiting for PostgreSQL response...");
+        }, 2000);
+
         try {
-            console.log("Onboarding Synchro-Matrix: COMMENCING...");
-            
-            // In CRA, we use process.env.REACT_APP_
-            const userId = user?.id;
+            const profileData = {
+                id: userId,
+                full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Hub Innovator",
+                department,
+                branch: branch || null,
+                roll_number: rollNo.toUpperCase().trim(),
+                onboarding_completed: true,
+                updated_at: new Date().toISOString()
+            };
 
-            if (!userId) {
-                alert("Identity Protocol Failure: Hub Identity missing. Try re-logging.");
-                setLoading(false);
-                return;
-            }
+            console.log("PostgreSQL Hub Sync: Initiating Split-Sync Strategy...");
 
-            console.log("PostgreSQL Hub Sync: Anchor Initiated...", { id: userId, department, rollNo });
-
-            const { error: upsertError } = await supabase
+            // 1. ATTEMPT INSERT FIRST (Identity Anchor)
+            const { error: insertError } = await supabase
                 .from("profiles")
-                .upsert({
-                    id: userId,
-                    full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Innovation Student",
-                    department,
-                    branch: branch || null,
-                    roll_number: rollNo.toUpperCase().trim(),
-                    onboarding_completed: true,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: "id" });
+                .insert([profileData]);
 
-            if (upsertError) {
-                console.error("DB Synchronization Error Matrix:", upsertError);
-                alert("Institutional Hub Sync Error: " + upsertError.message);
-            } else {
-                console.log("Anchoring Successful. Transitioning to Terminal Dashboard...");
-                // Refresh Hub State
-                await refreshProfile();
-                
-                // Success: Direct Hard Redirect as requested to clear auth-state residues 
-                window.location.href = "/dashboard";
+            if (insertError && insertError.code === '23505') {
+                console.log("Identity Already Anchored. Executing Matrix Update...");
+                // 2. IF EXISTS, PERFORM UPDATE
+                const { error: updateError } = await supabase
+                    .from("profiles")
+                    .update(profileData)
+                    .eq('id', userId);
+
+                if (updateError) throw updateError;
+            } else if (insertError) {
+                throw insertError;
             }
+
+            console.log("Anchoring Successful. Terminating Pulse.");
+            clearInterval(pulseInterval);
+
+            // Success Handshake
+            await refreshProfile();
+            window.location.href = "/dashboard";
+
         } catch (err) {
-            console.error("Unexpected Hub Pulsation Error:", err);
-            alert("Unexpected Protocol Error: " + err.message);
+            clearInterval(pulseInterval);
+            console.error("Critical Synchronization Failure:", err);
+            alert("Hub Synchronization Failed: " + (err.message || "Unknown connectivity error"));
         } finally {
             setLoading(false);
         }
