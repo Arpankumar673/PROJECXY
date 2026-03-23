@@ -5,7 +5,7 @@ import {
   Linkedin, Twitter, Globe, Link, 
   Edit3, Share2, Plus, Rocket, 
   Medal, Star, Award, ShieldCheck, 
-  TrendingUp, Activity
+  TrendingUp, Activity, Trophy
 } from 'lucide-react';
 import { Button, Card, cn } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';

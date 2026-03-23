@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Users, ArrowRight, Activity, 
   Search, Filter, Bookmark, Star, Rocket,
-  ChevronRight, LayoutGrid, List, Loader2, AlertCircle
+  ChevronRight, LayoutGrid, List, Loader2, AlertCircle, Trophy
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button, Card, cn } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { useProjects } from '../hooks/useProjects';
