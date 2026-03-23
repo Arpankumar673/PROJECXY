@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../ui';
 import { useAuth } from '../../hooks/useAuth';
+import { useUser } from '../../context/UserContext';
 
 const SidebarItem = ({ item, isActive, isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,7 +89,8 @@ const SidebarItem = ({ item, isActive, isCollapsed }) => {
 export const Sidebar = ({ isCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, logout } = useAuth();
+  const { logout } = useAuth();
+  const { profile } = useUser();
 
   const avatar = profile?.avatar_url 
     ? profile.avatar_url 

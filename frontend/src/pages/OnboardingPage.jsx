@@ -8,11 +8,13 @@ import {
 } from 'lucide-react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../hooks/useAuth';
+import { useUser } from '../context/UserContext';
 import { Button, Card, cn } from '../components/ui';
 
 export const OnboardingPage = () => {
     const navigate = useNavigate();
-    const { user, profile, refreshProfile } = useAuth();
+    const { user } = useAuth();
+    const { profile, refreshProfile } = useUser();
     
     const [department, setDepartment] = useState('');
     const [branch, setBranch] = useState('');

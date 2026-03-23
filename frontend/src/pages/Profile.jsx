@@ -12,9 +12,11 @@ import { Button, Card, cn } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { EditProfileModal } from '../components/profile/EditProfileModal';
 import { SocialLinks } from '../components/profile/SocialLinks';
+import { useUser } from '../context/UserContext';
 
 export const ProfilePage = () => {
-    const { user, profile, refreshProfile } = useAuth();
+    const { user } = useAuth();
+    const { profile, refreshProfile } = useUser();
     const [isEditOpen, setIsEditOpen] = useState(false);
 
     const avatar = profile?.avatar_url 

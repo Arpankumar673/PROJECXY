@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Input, cn } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { useUser } from '../context/UserContext';
 
 const SettingItem = ({ icon: Icon, title, desc, action, danger }) => (
     <div className="flex items-center justify-between p-8 hover:bg-gray-50/50 transition-all rounded-[32px] group relative overflow-hidden border border-transparent hover:border-gray-50 border-b-gray-50 last:border-b-transparent">
@@ -28,7 +29,8 @@ const SettingItem = ({ icon: Icon, title, desc, action, danger }) => (
 );
 
 export const SettingsPage = () => {
-    const { user, profile, logout } = useAuth();
+    const { logout } = useAuth();
+    const { profile } = useUser();
     const [theme, setTheme] = useState('System');
     const [notifications, setNotifications] = useState(true);
 

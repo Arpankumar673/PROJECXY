@@ -9,8 +9,10 @@ import { Button, Card, Input, cn } from '../ui';
 import { SkillsInput } from './SkillsInput';
 import { SocialLinks } from './SocialLinks';
 import { supabase } from '../../services/supabase';
+import { useUser } from '../../context/UserContext';
 
 export const EditProfileModal = ({ isOpen, onClose, profile, onUpdate }) => {
+  const { setProfile } = useUser();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -89,6 +91,9 @@ export const EditProfileModal = ({ isOpen, onClose, profile, onUpdate }) => {
         .eq('id', user.id);
 
       if (updateError) throw updateError;
+
+      // 🔥 Update Global State
+      setProfile(prev => ({ ...prev, ...updatePayload }));
 
       setSuccess(true);
       setTimeout(() => {
