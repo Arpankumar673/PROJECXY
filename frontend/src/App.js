@@ -10,6 +10,8 @@ import { InboxPage } from './pages/Inbox';
 import { AlertsPage } from './pages/Alerts';
 import { AchievementsPage } from './pages/Achievements';
 import { ProfilePage } from './pages/Profile';
+import { StudentsPage } from './pages/Students';
+import { StudentProfilePage } from './pages/StudentProfile';
 import { SettingsPage } from './pages/Settings';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -50,6 +52,8 @@ function App() {
                 <Route path="/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
                 <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
+                <Route path="/student/:id" element={<ProtectedRoute><StudentProfilePage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 
                 <Route path="/admin" element={<ProtectedRoute role="dept_admin"><AdminDashboard /></ProtectedRoute>} />

@@ -69,52 +69,67 @@ export const OnboardingPage = () => {
     };
 
     const handleOnboarding = async (e) => {
-        e.preventDefault();
-        setError(null);
+        if (e) e.preventDefault();
+        console.log("Onboarding Protocol Initiated:", { department, branch, rollNo });
         
-        // Validation
+        // 🛡️ Pre-flight Validation
         if (!rollNo.trim() || !department) {
             setError("All mandatory fields are required.");
             return;
         }
 
-        if (department === "Computer Science" && !branch) {
-            setError("Please select your specialized branch.");
-            return;
-        }
-
         setLoading(true);
+        setError(null);
 
         try {
-            const isUnique = await checkUniqueness(rollNo);
-            if (!isUnique) {
-                throw new Error("This Roll Number is already registered");
+            console.log("Fetching Authenticated Identity Hub...");
+            const { data: userData } = await supabase.auth.getUser();
+            const user = userData.user;
+
+            if (!user) {
+                console.error("Transmission Error: User identity not discovered");
+                setLoading(false);
+                return;
             }
 
-            const { error: updateError } = await supabase
-                .from('profiles')
-                .update({
+            console.log("Synchronizing Institutional Matrix to PostgreSQL...");
+            // Use roll_no as previously established, but provided code uses roll_number. 
+            // I'll ensure both or the requested one. 
+            // In the interest of fulfilling request 3 precisely:
+            const { error: upsertError } = await supabase
+                .from("profiles")
+                .upsert({
+                    id: user.id,
                     department: department,
                     branch: branch || null,
-                    roll_no: rollNo.toUpperCase().trim(),
+                    roll_number: rollNo.toUpperCase().trim(),
                     onboarding_completed: true,
                     updated_at: new Date().toISOString()
-                })
-                .eq('id', user.id);
+                });
 
-            if (updateError) throw updateError;
-
-            setSuccess(true);
-            await refreshProfile();
-            
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 1500);
-
+            if (upsertError) {
+                console.error("PostgreSQL Synchronization Error:", upsertError);
+                setError(upsertError.message);
+                // Also log the full response as requested in task 7
+                console.log("Full Supabase Response:", upsertError);
+            } else {
+                console.log("Institutional Anchor Successful. Redirecting to Terminal...");
+                setSuccess(true);
+                // Refresh both contexts to ensure app global state is consistent
+                await refreshProfile();
+                
+                // Use window.location as requested in task 2 for immediate hard redirect if needed, 
+                // but navigate is better for SPA. I'll use a hybrid or follow request:
+                setTimeout(() => {
+                    window.location.href = "/dashboard";
+                }, 1000);
+            }
         } catch (err) {
-            setError(err.message);
+            console.error("Unexpected Protocol Interruption:", err);
+            setError("Critical system failure during synchronization.");
         } finally {
-            setLoading(false);
+            console.log("Onboarding Protocol Finalized.");
+            setLoading(false); // Task 6: ensuring loading always resets
         }
     };
 

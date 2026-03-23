@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Rocket, Plus, Briefcase, 
   Layers, BarChart3, Trophy, User, Settings, 
   ChevronDown, Bell, LogOut, Search, Activity,
-  MessageSquare, Globe, Lock, Shield
+  MessageSquare, Globe, Lock, Shield, Users
 } from 'lucide-react';
 import { cn } from '../ui';
 import { useAuth } from '../../hooks/useAuth';
@@ -102,6 +102,7 @@ export const Sidebar = ({ isCollapsed }) => {
       items: [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Explore Hub', path: '/feed', icon: Rocket, badge: 'LIVE' },
+        { name: 'Discover', path: '/students', icon: Users },
         { name: 'Inbound', path: '/inbox', icon: MessageSquare, badge: 12 },
         { name: 'Status Center', path: '/alerts', icon: Bell },
       ]
