@@ -5,7 +5,7 @@ import { LoginPage, SignupPage } from './pages/AuthPages';
 import { CreateProject, ProjectDetails, TeamManagement } from './pages/ProjectPages';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { Dashboard } from './pages/Dashboard';
-import { FeedPage } from './pages/Feed';
+import { CampusProjects as FeedPage } from './pages/CampusProjects';
 import { InboxPage } from './pages/Inbox';
 import { AlertsPage } from './pages/Alerts';
 import { AchievementsPage } from './pages/Achievements';

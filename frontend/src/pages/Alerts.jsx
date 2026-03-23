@@ -1,105 +1,114 @@
 import React, { useState } from 'react';
 import { 
-  Bell, CheckCircle2, AlertCircle, 
-  Clock, ArrowRight, TrendingUp,
-  Mail, Settings, MoreVertical,
-  Calendar, CheckCircle, Info, Rocket, 
-  Trash2, Filter
+  Bell, CheckCircle2, Trash2, 
+  AlertCircle, LayoutGrid, List,
+  Loader2, Rocket, Search, Activity,
+  Filter, Hash, SlidersHorizontal, ChevronDown
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Card, cn } from '../components/ui';
-
-const NotificationCard = ({ notification, onRead }) => {
-    const icons = {
-        invite: <Rocket className="w-5 h-5 text-blue-500" />,
-        deadline: <Clock className="w-5 h-5 text-amber-500" />,
-        system: <Info className="w-5 h-5 text-indigo-500" />,
-        success: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
-        alert: <AlertCircle className="w-5 h-5 text-red-500" />
-    };
-
-    const colors = {
-        invite: "bg-blue-50/50 border-blue-100",
-        deadline: "bg-amber-50/50 border-amber-100",
-        system: "bg-indigo-50/50 border-indigo-100",
-        success: "bg-emerald-50/50 border-emerald-100",
-        alert: "bg-red-50/50 border-red-100"
-    };
-
-    return (
-        <Card className={cn(
-            "p-6 md:p-8 flex items-start gap-6 group hover:translate-x-1 transition-all duration-300 border-none bg-white rounded-[32px] hover:shadow-xl",
-            notification.unread && "shadow-soft border-l-[6px] border-l-projecxy-blue"
-        )}>
-            <div className={cn(
-                "w-14 h-14 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110",
-                colors[notification.type] || colors.system
-            )}>
-                {icons[notification.type] || icons.system}
-            </div>
-            <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-lg font-black text-projecxy-text tracking-tighter uppercase leading-none mb-1.5">{notification.title}</h4>
-                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest whitespace-nowrap ml-4">{notification.time}</span>
-                </div>
-                <p className="text-sm md:text-base text-projecxy-secondary font-medium leading-relaxed mb-6">{notification.description}</p>
-                <div className="flex items-center gap-4">
-                    <button className="text-[10px] font-black uppercase tracking-[0.2em] text-projecxy-blue hover:opacity-70 transition-opacity flex items-center gap-2">
-                        Execute Action <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                    {notification.unread && (
-                        <button onClick={() => onRead(notification.id)} className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 hover:text-projecxy-text">
-                           Dismiss Alert
-                        </button>
-                    )}
-                </div>
-            </div>
-            <button className="p-2 text-gray-200 hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                <MoreVertical className="w-5 h-5" />
-            </button>
-        </Card>
-    );
-};
+import { useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../hooks/useNotifications';
+import { AlertsList } from '../components/alerts/AlertsList';
 
 export const AlertsPage = () => {
-    const [filter, setFilter] = useState('All');
-    const [notifications, setNotifications] = useState([
-        { id: 1, type: 'invite', title: 'AgriBot Deployment', description: 'Arpan Kumar invited you to synchronize with the autonomous agricultural drone project.', time: '2 mins ago', unread: true },
-        { id: 2, type: 'deadline', title: 'Milestone Warning', description: 'The "Neural Link API" final institutional presentation is scheduled for tomorrow at 2:00 PM.', time: '1 hour ago', unread: true },
-        { id: 3, type: 'success', title: 'Repository Protected', description: 'Semantic AI engine confirmed your original logic in the "Institutional Data Mesh" documentation.', time: '3 hours ago', unread: false },
-        { id: 4, type: 'system', title: 'Gateway Updated', description: 'Projecxy Core 2.0 deployment successful. New workspace modules are now live.', time: 'Yesterday', unread: false },
-        { id: 5, type: 'alert', title: 'Security Protocol', description: 'An unauthorized login attempt was blocked from a new device in California, USA.', time: '2 days ago', unread: false },
-    ]);
+    const { user } = useAuth();
+    const { 
+        notifications, 
+        unreadCount, 
+        loading, 
+        markAsRead, 
+        markAllAsRead, 
+        deleteNotification,
+        refetch
+    } = useNotifications(user?.id);
 
-    const markAsRead = (id) => {
-        setNotifications(notifications.map(n => n.id === id ? { ...n, unread: false } : n));
-    };
+    const [filter, setFilter] = useState('all'); // all, unread, project, message
+
+    const filteredAlerts = (notifications || []).filter(alert => {
+        if (filter === 'unread') return !alert.is_read;
+        if (filter === 'project') return alert.type === 'project_join';
+        if (filter === 'message') return alert.type === 'message';
+        return true;
+    });
 
     return (
-        <div className="max-w-4xl mx-auto py-10 px-4 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-                <div className="space-y-1">
-                    <h2 className="text-4xl font-black text-projecxy-text tracking-tighter uppercase leading-none">Status Center</h2>
-                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-projecxy-secondary opacity-50 pl-1">Encryption Handshake Active</p>
+        <div className="max-w-7xl mx-auto py-10 px-4 space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            
+            {/* 🎯 HUB HEADER */}
+            <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 bg-white p-10 rounded-[48px] border border-gray-100 shadow-soft relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-projecxy-blue/5 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-1000 group-hover:scale-150" />
+                <div className="space-y-3 relative z-10">
+                    <h1 className="text-4xl md:text-6xl font-black text-projecxy-text tracking-tighter uppercase leading-none">Status Center</h1>
+                    <p className="text-sm md:text-lg text-projecxy-secondary font-bold uppercase tracking-[0.3em] opacity-60 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-projecxy-blue" /> Alert Ledger Synchronized
+                    </p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" className="h-14 rounded-2xl px-6 border-gray-100 text-[10px] font-black uppercase tracking-[0.15em]">
-                       Mark All Read
+                <div className="flex gap-4 w-full md:w-auto relative z-10">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => { refetch(); Notification.requestPermission(); }}
+                      className="h-16 px-8 rounded-[28px] uppercase tracking-[0.3em] text-[10px] font-black border-gray-100 bg-white shadow-soft transition-all hover:shadow-xl"
+                    >
+                        <SlidersHorizontal className="w-5 h-5 mr-3" /> Hardware Protocol
                     </Button>
-                    <button className="w-14 h-14 rounded-2xl bg-white border border-gray-100 shadow-soft flex items-center justify-center text-projecxy-secondary hover:text-projecxy-blue transition-all">
-                        <Filter className="w-5 h-5" />
-                    </button>
+                    <Button 
+                      size="lg" 
+                      onClick={() => markAllAsRead()}
+                      disabled={unreadCount === 0}
+                      className="h-16 px-10 rounded-[28px] uppercase tracking-[0.3em] text-[10px] font-black group shadow-lg shadow-blue-100 disabled:opacity-30 disabled:scale-100 disabled:shadow-none"
+                    >
+                        <CheckCircle2 className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" /> Clear All Pulses
+                    </Button>
                 </div>
-            </div>
+            </header>
 
-            <div className="space-y-6 pb-20">
-                {notifications.map(n => (
-                    <NotificationCard key={n.id} notification={n} onRead={markAsRead} />
+            {/* 🧬 DISCOVERY FILTERS */}
+            <div className="flex flex-wrap items-center gap-4 border-b border-gray-50 pb-px">
+                {[
+                    { id: 'all', label: 'All Inbound Alerts', icon: LayoutGrid },
+                    { id: 'unread', label: 'Unprocessed Inbound', icon: Bell, count: unreadCount },
+                    { id: 'project', label: 'Institutional Joins', icon: UserPlus },
+                    { id: 'message', label: 'Digital Pulses', icon: MessageSquare }
+                ].map((item) => (
+                    <button 
+                        key={item.id}
+                        onClick={() => setFilter(item.id)}
+                        className={cn(
+                            "pb-4 text-[10px] font-black uppercase tracking-widest transition-all relative px-2 flex items-center gap-2",
+                            filter === item.id ? "text-projecxy-blue" : "text-gray-400 hover:text-projecxy-text"
+                        )}
+                    >
+                        {item.label}
+                        {item.count > 0 && (
+                            <span className="w-5 h-5 bg-projecxy-blue text-white rounded-lg flex items-center justify-center text-[9px] font-black shadow-lg shadow-blue-100">{item.count}</span>
+                        )}
+                        {filter === item.id && <motion.span layoutId="activeAlertTab" className="absolute bottom-0 left-0 right-0 h-1 bg-projecxy-blue rounded-full" />}
+                    </button>
                 ))}
             </div>
 
-            <div className="text-center pt-10 opacity-30">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Hub Notifications Synchronized</p>
-            </div>
+            {/* 🛰️ HUB REPOSITORY */}
+            <AlertsList 
+              alerts={filteredAlerts}
+              onRead={markAsRead}
+              onDelete={deleteNotification}
+              onMarkAllRead={markAllAsRead}
+              loading={loading}
+            />
+
         </div>
     );
 };
+
+// Helper for dynamic imports
+const UserPlus = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+    </svg>
+);
+const MessageSquare = ({ className }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+    </svg>
+);
