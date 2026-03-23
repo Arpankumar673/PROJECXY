@@ -70,66 +70,50 @@ export const OnboardingPage = () => {
 
     const handleOnboarding = async (e) => {
         if (e) e.preventDefault();
-        console.log("Onboarding Protocol Initiated:", { department, branch, rollNo });
-        
-        // 🛡️ Pre-flight Validation
-        if (!rollNo.trim() || !department) {
-            setError("All mandatory fields are required.");
-            return;
-        }
-
         setLoading(true);
-        setError(null);
 
         try {
-            console.log("Fetching Authenticated Identity Hub...");
+            console.log("Protocol Initiation: Fetching ID...");
             const { data: userData } = await supabase.auth.getUser();
             const user = userData.user;
 
             if (!user) {
-                console.error("Transmission Error: User identity not discovered");
+                console.error("Transmission Error: User identity not found");
+                alert("Session identity missing. Please re-login.");
                 setLoading(false);
                 return;
             }
 
-            console.log("Synchronizing Institutional Matrix to PostgreSQL...");
-            // Use roll_no as previously established, but provided code uses roll_number. 
-            // I'll ensure both or the requested one. 
-            // In the interest of fulfilling request 3 precisely:
-            const { error: upsertError } = await supabase
+            console.log("Transmission Phase: UPSERT on Profiles...", { id: user.id, department, branch, rollNo });
+
+            const { data: responseData, error: upsertError } = await supabase
                 .from("profiles")
                 .upsert({
                     id: user.id,
-                    department: department,
-                    branch: branch || null,
+                    department,
+                    branch,
                     roll_number: rollNo.toUpperCase().trim(),
                     onboarding_completed: true,
                     updated_at: new Date().toISOString()
-                });
+                }, { onConflict: 'id' }) // Explicitly using ID conflict logic
+                .select(); // Explicitly selecting back data for logging
+
+            console.log("Supabase Full Sync Response:", { responseData, upsertError });
 
             if (upsertError) {
-                console.error("PostgreSQL Synchronization Error:", upsertError);
-                setError(upsertError.message);
-                // Also log the full response as requested in task 7
-                console.log("Full Supabase Response:", upsertError);
+                console.error("Onboarding Synchronize Error:", upsertError);
+                alert("Hub Sync Error: " + upsertError.message);
             } else {
-                console.log("Institutional Anchor Successful. Redirecting to Terminal...");
-                setSuccess(true);
-                // Refresh both contexts to ensure app global state is consistent
-                await refreshProfile();
-                
-                // Use window.location as requested in task 2 for immediate hard redirect if needed, 
-                // but navigate is better for SPA. I'll use a hybrid or follow request:
-                setTimeout(() => {
-                    window.location.href = "/dashboard";
-                }, 1000);
+                console.log("Anchoring Persistent Ledger Successful. Executing Terminal Redirect...");
+                // Directly redirecting as requested to break any state loops
+                window.location.href = "/dashboard";
             }
         } catch (err) {
-            console.error("Unexpected Protocol Interruption:", err);
-            setError("Critical system failure during synchronization.");
+            console.error("Unexpected Protocol Error:", err);
+            alert("Unexpected system failure: " + err.message);
         } finally {
             console.log("Onboarding Protocol Finalized.");
-            setLoading(false); // Task 6: ensuring loading always resets
+            setLoading(false);
         }
     };
 

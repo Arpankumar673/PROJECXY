@@ -19,7 +19,8 @@ export const UserProvider = ({ children }) => {
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (error) {
         // Fallback for missing profile
