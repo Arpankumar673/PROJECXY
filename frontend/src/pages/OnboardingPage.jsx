@@ -75,29 +75,29 @@ export const OnboardingPage = () => {
         try {
             console.log("Onboarding Hub Status: COMMENCING...");
             
-            // Bypass redundant getUser call for speed
+            // 🛡️ Fail-safe Timeout (5 seconds)
+            const timeout = setTimeout(() => {
+                setLoading(false);
+                alert("PROTOCOL TIMEOUT: The connection to Supabase is hanging. This usually indicates a CORS issue. Please verify that 'https://projectxy.vercel.app' is added to 'Allowed Origins' in your Supabase Dashboard -> Settings -> API.");
+            }, 5000);
+
+            // 🔍 Identity Ledger Discovery
             if (!user?.id) {
-                console.error("Critical Failure: Identity Ledger not discovered in Context");
-                alert("Identity sync failed. Please attempt a re-authentication pulse.");
+                clearTimeout(timeout);
+                console.error("Critical Failure: Identity not discovered in Hub Context");
+                alert("Identity sync failed. Please re-authenticate.");
                 setLoading(false);
                 return;
             }
 
-            console.log("Transmission Phase: Initiating PostgreSQL Upsert...", { id: user.id, department, branch, rollNo });
+            console.log("Transmission Phase: Initiating PostgreSQL Synchronization...", { id: user.id, department, rollNo });
 
-            // Ensure department and rollNo are not empty for the DB
-            if (!department || !rollNo) {
-                console.error("Transmission Error: Mandatory identity fields missing");
-                alert("Incomplete Identity: Sector and Roll ID are mandatory.");
-                setLoading(false);
-                return;
-            }
-
+            // 🛰️ EXECUTE UPSERT (Identity Anchor)
             const { error: upsertError } = await supabase
                 .from("profiles")
                 .upsert({
                     id: user.id,
-                    full_name: user.user_metadata?.full_name || user.user_metadata?.name || "Innovator",
+                    full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Innovator Hub",
                     department,
                     branch: branch || null,
                     roll_number: rollNo.toUpperCase().trim(),
@@ -105,23 +105,25 @@ export const OnboardingPage = () => {
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
 
+            clearTimeout(timeout); // Hub connection established successfully
+
             if (upsertError) {
-                console.error("Onboarding Persistence Error. Full Trace:", upsertError);
-                alert("PostgreSQL Sync Error: " + upsertError.message);
+                console.error("PostgreSQL Persistence Error:", upsertError);
+                alert("Institutional Hub Sync Error: " + upsertError.message);
             } else {
-                console.log("Onboarding Protocol Verified. Terminal Redirect in Progress...");
+                console.log("Onboarding Protocol Verified. Executing Hub Redirect...");
                 
-                // Final state pulse
+                // Final persistent pulse
                 await refreshProfile();
                 
-                // Hard reset redirect to clear any auth state residue
+                // Use a hard redirect to ensure the global state is freshly provisioned
                 window.location.href = "/dashboard";
             }
         } catch (err) {
-            console.error("Unexpected Protocol Interruption:", err);
-            alert("Unexpected failure: " + err.message);
+            console.error("Unexpected Hub Interruption:", err);
+            alert("Unexpected system failure: " + err.message);
         } finally {
-            console.log("Onboarding Sequence Complete.");
+            console.log("Onboarding Pulse Finalized.");
             setLoading(false);
         }
     };
