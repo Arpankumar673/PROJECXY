@@ -1,24 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-// 🚀 VITE STANDARD CONFIGURATION (Vercel Production Ready)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// 🛸 PROJECXY: CRA-STANDARD CONNECTIVITY HUB
+// Since the project is using 'react-scripts', we MUST use process.env.REACT_APP_
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || "https://zwjdigzhdhbpvtpdzjzc.supabase.co";
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3amRpZ3poZGhicHZ0cGR6anpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDU1MDUsImV4cCI6MjA4OTY4MTUwNX0.CekoY69r6jmvZypr2aIhfm1Dt7PAEpEZThvP4_VHT0E";
 
-// 🛡️ SECURITY DIAGNOSTIC
-if (!supabaseUrl || !supabaseKey) {
-  console.error("CRITICAL CONFIGURATION ERROR: Supabase environment variables are UNDEFINED.", {
-    url: supabaseUrl ? "Defined (Check Vercel for spelling)" : "MISSING",
-    key: supabaseKey ? "Defined" : "MISSING"
-  });
-  // During local development, this helps identify missing .env files
-  // In production, this prevents the app from hanging silently
+if (!process.env.REACT_APP_SUPABASE_URL) {
+  console.warn("Hub Engine Status: Missing environment configuration. Using institutional fallback bridge.");
 }
 
-// Ensure createClient is only called with valid strings to avoid crash
-export const supabase = (supabaseUrl && supabaseKey) 
-  ? createClient(supabaseUrl, supabaseKey) 
-  : null;
-
-if (!supabase) {
-  console.warn("Hub Protocol Offline: Supabase client could not be initialized due to missing VITE_ environment variables.");
-}
+export const supabase = createClient(supabaseUrl, supabaseKey);

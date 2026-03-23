@@ -73,29 +73,24 @@ export const OnboardingPage = () => {
         setLoading(true);
 
         try {
-            console.log("Onboarding Protocol Status: INITIATING HUB ANCHOR...");
+            console.log("Onboarding Synchro-Matrix: COMMENCING...");
             
-            // 🛡️ Fail-safe Timeout (6 seconds)
-            const timeout = setTimeout(() => {
-                setLoading(false);
-                alert("PROTOCOL TIMEOUT: The database connection is hanging. This usually indicates a CORS issue. Please add 'https://projectxy.vercel.app' to 'Allowed Origins' in your Supabase Dashboard -> Settings -> API.");
-            }, 6000);
+            // In CRA, we use process.env.REACT_APP_
+            const userId = user?.id;
 
-            if (!user?.id) {
-                clearTimeout(timeout);
-                console.error("Critical Failure: Identity Ledger not available in Context.");
+            if (!userId) {
                 alert("Identity Protocol Failure: Hub Identity missing. Try re-logging.");
                 setLoading(false);
                 return;
             }
 
-            console.log("PostgreSQL Hub Sync: Anchor Initiated...", { id: user.id, department, rollNo });
+            console.log("PostgreSQL Hub Sync: Anchor Initiated...", { id: userId, department, rollNo });
 
             const { error: upsertError } = await supabase
                 .from("profiles")
                 .upsert({
-                    id: user.id,
-                    full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Hub Student",
+                    id: userId,
+                    full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || "Innovation Student",
                     department,
                     branch: branch || null,
                     roll_number: rollNo.toUpperCase().trim(),
@@ -103,13 +98,14 @@ export const OnboardingPage = () => {
                     updated_at: new Date().toISOString()
                 }, { onConflict: "id" });
 
-            clearTimeout(timeout);
-
             if (upsertError) {
                 console.error("DB Synchronization Error Matrix:", upsertError);
                 alert("Institutional Hub Sync Error: " + upsertError.message);
             } else {
                 console.log("Anchoring Successful. Transitioning to Terminal Dashboard...");
+                // Refresh Hub State
+                await refreshProfile();
+                
                 // Success: Direct Hard Redirect as requested to clear auth-state residues 
                 window.location.href = "/dashboard";
             }

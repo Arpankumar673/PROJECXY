@@ -31,31 +31,9 @@ const InnovationLayout = () => (
 
 function App() {
   console.log("ENVIRONMENT VERIFICATION PULSE:", {
-    url: import.meta.env.VITE_SUPABASE_URL ? "IDENTIFIED (Production Safe)" : "UNDEFINED (Check Vercel Setting Name)",
-    key: import.meta.env.VITE_SUPABASE_ANON_KEY ? "IDENTIFIED" : "UNDEFINED"
+    url: process.env.REACT_APP_SUPABASE_URL ? "IDENTIFIED (CRA Standard)" : "UNDEFINED (Check Vercel Setting Name)",
+    key: process.env.REACT_APP_SUPABASE_ANON_KEY ? "IDENTIFIED" : "UNDEFINED"
   });
-
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-    return (
-      <div className="min-h-screen bg-projecxy-bg flex items-center justify-center p-6 font-sans antialiased text-center">
-        <div className="max-w-xl w-full bg-white p-12 rounded-[48px] shadow-soft border border-gray-100 space-y-8">
-          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto">
-             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-          </div>
-          <div className="space-y-4">
-            <h1 className="text-3xl font-black text-projecxy-text tracking-tighter uppercase">Environment Locked</h1>
-            <p className="text-projecxy-secondary font-bold text-sm uppercase tracking-widest leading-relaxed">Identity Hub secrets (VITE_SUPABASE_URL) are UNDEFINED in this build context.</p>
-          </div>
-          <div className="bg-gray-50 rounded-[32px] p-8 font-mono text-left text-xs text-gray-400 border border-transparent group hover:border-blue-100 transition-colors">
-            <code className="block mb-2 text-projecxy-blue"># PROTOCOL DIAGNOSIS</code>
-            <p className="mb-1 text-red-400 font-bold">» SYSTEM.VAR.URL: UNDEFINED</p>
-            <p className="mb-4">» TARGET PATH: VERCEL-ENV-PULSE</p>
-            <p className="leading-6 opacity-60 font-sans font-bold uppercase text-[10px]">Ensure you have set the VITE_ prefixed keys in your Vercel Dashboard and REDEPLOYED the app with "Clear Cache".</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <AuthProvider>
