@@ -30,6 +30,11 @@ const InnovationLayout = () => (
 );
 
 function App() {
+  console.log("ENVIRONMENT VERIFICATION PULSE:", {
+    url: import.meta.env.VITE_SUPABASE_URL ? "IDENTIFIED (Production Safe)" : "UNDEFINED (Check Vercel Setting Name)",
+    key: import.meta.env.VITE_SUPABASE_ANON_KEY ? "IDENTIFIED" : "UNDEFINED"
+  });
+
   return (
     <AuthProvider>
       <UserProvider>

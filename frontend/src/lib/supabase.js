@@ -1,11 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 
-// 🛸 CONNECTIVITY BRIDGE: Prioritizing Vercel ENV -> Falling back to Hub Defaults
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://zwjdigzhdhbpvtpdzjzc.supabase.co";
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3amRpZ3poZGhicHZ0cGR6anpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDU1MDUsImV4cCI6MjA4OTY4MTUwNX0.CekoY69r6jmvZypr2aIhfm1Dt7PAEpEZThvP4_VHT0E";
+// 🚀 VITE STANDARD CONFIGURATION (Vercel Production Ready)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!import.meta.env.VITE_SUPABASE_URL) {
-  console.warn("VITE_SUPABASE_URL is missing. Using institutional bridge fallback. Please verify Vercel Secrets.");
+// 🛡️ SECURITY DIAGNOSTIC
+if (!supabaseUrl || !supabaseKey) {
+  console.error("CRITICAL CONFIGURATION ERROR: Supabase environment variables are UNDEFINED.", {
+    url: supabaseUrl ? "Defined (Check Vercel for spelling)" : "MISSING",
+    key: supabaseKey ? "Defined" : "MISSING"
+  });
+  // During local development, this helps identify missing .env files
+  // In production, this prevents the app from hanging silently
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Ensure createClient is only called with valid strings to avoid crash
+export const supabase = createClient(supabaseUrl || "", supabaseKey || "");
