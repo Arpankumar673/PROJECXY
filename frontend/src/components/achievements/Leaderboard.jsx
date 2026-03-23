@@ -4,7 +4,7 @@ import {
   Zap, Award, Users, Rocket,
   TrendingUp, Activity, BarChart3,
   CheckCircle2, Globe, ShieldCheck, Heart,
-  ChevronRight, ArrowUpRight
+  ChevronRight, ArrowUpRight, Loader2
 } from 'lucide-react';
 import { Card, cn } from '../ui';
 
