@@ -8,4 +8,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error("VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is missing in your build environment. Hub connection aborted.");
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+    ? createClient(supabaseUrl, supabaseAnonKey) 
+    : null;
+
+if (!supabase) {
+    console.error("Hub Protocol Offline: Supabase sync unavailable due to environment absence.");
+}

@@ -15,4 +15,10 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // Ensure createClient is only called with valid strings to avoid crash
-export const supabase = createClient(supabaseUrl || "", supabaseKey || "");
+export const supabase = (supabaseUrl && supabaseKey) 
+  ? createClient(supabaseUrl, supabaseKey) 
+  : null;
+
+if (!supabase) {
+  console.warn("Hub Protocol Offline: Supabase client could not be initialized due to missing VITE_ environment variables.");
+}
