@@ -73,46 +73,55 @@ export const OnboardingPage = () => {
         setLoading(true);
 
         try {
-            console.log("Protocol Initiation: Fetching ID...");
-            const { data: userData } = await supabase.auth.getUser();
-            const user = userData.user;
-
-            if (!user) {
-                console.error("Transmission Error: User identity not found");
-                alert("Session identity missing. Please re-login.");
+            console.log("Onboarding Hub Status: COMMENCING...");
+            
+            // Bypass redundant getUser call for speed
+            if (!user?.id) {
+                console.error("Critical Failure: Identity Ledger not discovered in Context");
+                alert("Identity sync failed. Please attempt a re-authentication pulse.");
                 setLoading(false);
                 return;
             }
 
-            console.log("Transmission Phase: UPSERT on Profiles...", { id: user.id, department, branch, rollNo });
+            console.log("Transmission Phase: Initiating PostgreSQL Upsert...", { id: user.id, department, branch, rollNo });
 
-            const { data: responseData, error: upsertError } = await supabase
+            // Ensure department and rollNo are not empty for the DB
+            if (!department || !rollNo) {
+                console.error("Transmission Error: Mandatory identity fields missing");
+                alert("Incomplete Identity: Sector and Roll ID are mandatory.");
+                setLoading(false);
+                return;
+            }
+
+            const { error: upsertError } = await supabase
                 .from("profiles")
                 .upsert({
                     id: user.id,
+                    full_name: user.user_metadata?.full_name || user.user_metadata?.name || "Innovator",
                     department,
-                    branch,
+                    branch: branch || null,
                     roll_number: rollNo.toUpperCase().trim(),
                     onboarding_completed: true,
                     updated_at: new Date().toISOString()
-                }, { onConflict: 'id' }) // Explicitly using ID conflict logic
-                .select(); // Explicitly selecting back data for logging
-
-            console.log("Supabase Full Sync Response:", { responseData, upsertError });
+                }, { onConflict: 'id' });
 
             if (upsertError) {
-                console.error("Onboarding Synchronize Error:", upsertError);
-                alert("Hub Sync Error: " + upsertError.message);
+                console.error("Onboarding Persistence Error. Full Trace:", upsertError);
+                alert("PostgreSQL Sync Error: " + upsertError.message);
             } else {
-                console.log("Anchoring Persistent Ledger Successful. Executing Terminal Redirect...");
-                // Directly redirecting as requested to break any state loops
+                console.log("Onboarding Protocol Verified. Terminal Redirect in Progress...");
+                
+                // Final state pulse
+                await refreshProfile();
+                
+                // Hard reset redirect to clear any auth state residue
                 window.location.href = "/dashboard";
             }
         } catch (err) {
-            console.error("Unexpected Protocol Error:", err);
-            alert("Unexpected system failure: " + err.message);
+            console.error("Unexpected Protocol Interruption:", err);
+            alert("Unexpected failure: " + err.message);
         } finally {
-            console.log("Onboarding Protocol Finalized.");
+            console.log("Onboarding Sequence Complete.");
             setLoading(false);
         }
     };

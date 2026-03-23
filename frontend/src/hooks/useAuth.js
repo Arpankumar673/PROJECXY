@@ -16,7 +16,8 @@ export const AuthProvider = ({ children }) => {
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
-                .single();
+                .limit(1)
+                .maybeSingle();
 
             // Fallback: If select '*' fails due to missing columns, try core identity fields only
             if (error) {
@@ -25,7 +26,8 @@ export const AuthProvider = ({ children }) => {
                     .from('profiles')
                     .select('id, full_name, role')
                     .eq('id', userId)
-                    .single();
+                    .limit(1)
+                    .maybeSingle();
                 
                 if (fallbackError) throw fallbackError;
                 p = fallbackData;
