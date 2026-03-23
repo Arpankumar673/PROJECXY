@@ -21,9 +21,9 @@ export const DashboardLayout = ({ children }) => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Campus Feed', path: '/dashboard', icon: Briefcase },
-    { name: 'Inbox', path: '/dashboard', icon: MessageSquare, badge: 3 },
-    { name: 'Alerts', path: '/dashboard', icon: Bell },
+    { name: 'Campus Feed', path: '/feed', icon: Briefcase },
+    { name: 'Inbox', path: '/inbox', icon: MessageSquare, badge: 3 },
+    { name: 'Alerts', path: '/alerts', icon: Bell },
   ];
 
   const NavItem = ({ item }) => (
@@ -92,26 +92,38 @@ export const DashboardLayout = ({ children }) => {
 
              <div className="mt-8">
                 <p className="text-[10px] text-projecxy-secondary font-bold uppercase tracking-[0.25em] mb-4 pl-4">Institutional Hub</p>
-                <button className="w-full flex items-center gap-3.5 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-projecxy-text rounded-2xl transition-all group">
-                   <GraduationCap className="w-5 h-5 text-gray-400 group-hover:text-projecxy-blue" />
-                   <span className="text-sm font-bold uppercase tracking-widest">Achievements</span>
-                </button>
+                <NavLink 
+                  to="/achievements"
+                  onClick={() => setMobileOpen(false)}
+                  className={({ isActive }) => cn(
+                    "flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-300 group mb-1",
+                    isActive 
+                      ? "bg-blue-50 text-projecxy-blue shadow-soft" 
+                      : "text-gray-500 hover:bg-gray-50 hover:text-projecxy-text"
+                  )}
+                >
+                   <GraduationCap className={cn("w-5 h-5 transition-colors", location.pathname === '/achievements' ? "text-projecxy-blue" : "text-gray-400 group-hover:text-projecxy-blue")} />
+                   <span className={cn("text-xs font-bold uppercase tracking-widest transition-colors", location.pathname === '/achievements' ? "text-projecxy-blue" : "text-gray-500 group-hover:text-projecxy-text")}>Achievements</span>
+                </NavLink>
              </div>
           </nav>
 
           <div className="mt-auto">
-             <div className="bg-gray-50/50 rounded-3xl p-4 border border-gray-100 mb-4 group hover:bg-white hover:shadow-soft transition-all cursor-pointer">
+             <div className="bg-gray-50/50 rounded-3xl p-4 border border-gray-100 mb-4 group hover:bg-white hover:shadow-soft transition-all cursor-pointer" onClick={() => navigate('/profile')}>
                 <div className="flex items-center gap-3 min-w-0">
                    <img 
                       src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} 
                       className="w-12 h-12 rounded-2xl border-2 border-white shadow-md flex-shrink-0" 
                       alt="avatar"
+                      onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile?.full_name || 'User'}`}
                    />
                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-projecxy-text truncate capitalize">{profile?.full_name || 'Innovator'}</p>
                       <p className="text-[10px] text-projecxy-blue font-bold uppercase tracking-tighter truncate flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Verified Pilot</p>
                    </div>
-                   <Settings className="w-4 h-4 text-gray-300 group-hover:text-projecxy-blue transition-colors" />
+                   <button onClick={(e) => { e.stopPropagation(); navigate('/settings'); }} className="p-2 hover:bg-blue-50 rounded-xl transition-all">
+                      <Settings className="w-4 h-4 text-gray-300 group-hover:text-projecxy-blue transition-colors" />
+                   </button>
                 </div>
              </div>
 
