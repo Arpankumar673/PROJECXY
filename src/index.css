@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #F3F2EF;
+  --color-foreground: #000000;
+
+  --color-card: #FFFFFF;
+  --color-card-foreground: #000000;
+
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #000000;
+
+  --color-primary: #0A66C2;
+  --color-primary-foreground: #FFFFFF;
+
+  --color-secondary: #EBEBEB;
+  --color-secondary-foreground: #666666;
+
+  --color-muted: #F3F2EF;
+  --color-muted-foreground: #666666;
+
+  --color-accent: #0A66C2;
+  --color-accent-foreground: #FFFFFF;
+
+  --color-destructive: #CC1016;
+  --color-destructive-foreground: #FFFFFF;
+
+  --color-border: #E0E0E0;
+  --color-input: #E0E0E0;
+  --color-ring: #0A66C2;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.6rem;
+  --radius-xl: 0.75rem;
+  
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+
+  --shadow-sm: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@layer base {
+  * {
+    @apply border-border transition-colors duration-200;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 14px;
+  }
+}
+
+/* LinkedIn style with premium animations */
+.li-card {
+  @apply bg-white border border-border rounded-lg shadow-sm transition-all duration-300;
+}
+
+.li-card:hover {
+  @apply -translate-y-1 shadow-hover border-primary/20;
+}
+
+.li-button-primary {
+  @apply bg-primary text-white font-semibold px-4 py-1.5 rounded-full hover:bg-[#004182] transition-all duration-300 flex items-center justify-center active:scale-95 hover:scale-[1.03] hover:shadow-md;
+}
+
+.li-button-secondary {
+  @apply border border-primary text-primary font-semibold px-4 py-1.5 rounded-full hover:bg-primary/5 transition-all duration-300 flex items-center justify-center active:scale-95 hover:scale-[1.03];
+}
+
+.li-input {
+  @apply bg-[#EEF3F8] border border-[#D9E2ED] focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-white rounded-[12px] px-4 py-2.5 transition-all duration-300 text-sm outline-none w-full;
+}
+
+.li-input-icon {
+  @apply pl-12 !important;
+}
+
+/* Page Transitions */
+.page-enter {
+  animation: fade-up 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Text Fade */
+.animate-text {
+  animation: text-fade 0.8s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes text-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+  @apply bg-neutral-200 animate-pulse rounded;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3F2EF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9C9C9;
+  border: 2px solid #F3F2EF;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A0A0A0;
+}
