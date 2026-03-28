@@ -10,7 +10,7 @@ type Role = 'student' | 'department'
 
 export default function Auth() {
   const navigate = useNavigate()
-  const { } = useAuth()
+  const { signInWithGoogle } = useAuth()
   const [step, setStep] = useState<AuthStep>('role')
   const [role, setRole] = useState<Role>('student')
   const [isLogin, setIsLogin] = useState(true)
@@ -164,6 +164,32 @@ export default function Auth() {
                  {error}
                </div>
              )}
+
+             <div className="space-y-4 mb-6">
+               <button 
+                 type="button"
+                 onClick={async () => {
+                   setLoading(true)
+                   setError('')
+                   try {
+                     await signInWithGoogle()
+                   } catch (err: any) {
+                     setError(err.message)
+                     setLoading(false)
+                   }
+                 }}
+                 disabled={loading}
+                 className="w-full py-3 rounded-xl border-2 border-gray-100 flex items-center justify-center gap-3 font-bold text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50"
+               >
+                 <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
+                 Continue with Google
+               </button>
+
+               <div className="relative py-2">
+                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-100"></span></div>
+                 <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-gray-400"><span className="bg-white px-2">or continue with email</span></div>
+               </div>
+             </div>
 
              <form onSubmit={handleAuth} className="space-y-5">
                 {!isLogin && role === 'student' && (
