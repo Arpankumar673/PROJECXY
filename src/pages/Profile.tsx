@@ -9,7 +9,7 @@ import ProjectsSection from '../components/profile/ProjectsSection'
 import EditProfileModal from '../components/profile/EditProfileModal'
 
 export default function Profile() {
-  const { user: authUser, profile: authProfile, refreshProfile, loading: authLoading } = useAuth()
+  const { user: authUser, refreshProfile, loading: authLoading } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const queryParams = new URLSearchParams(location.search)
@@ -67,7 +67,7 @@ export default function Profile() {
 
     if (error) throw error
     await refreshProfile()
-    setTargetProfile(prev => ({ ...prev, bio: newBio }))
+    setTargetProfile((prev: any) => ({ ...prev, bio: newBio }))
   }
 
   const handleUpdateSkills = async (newSkills: string[]) => {
@@ -79,7 +79,7 @@ export default function Profile() {
 
     if (error) throw error
     await refreshProfile()
-    setTargetProfile(prev => ({ ...prev, skills: newSkills }))
+    setTargetProfile((prev: any) => ({ ...prev, skills: newSkills }))
   }
 
   const handleAddProject = async (projectData: any) => {
@@ -128,12 +128,12 @@ export default function Profile() {
         onEdit={async (p) => {
           if (!isOwnProfile) return
           await supabase.from('projects').update(p).eq('id', p.id)
-          setTargetProjects(prev => prev.map(item => item.id === p.id ? { ...item, ...p } : item))
+          setTargetProjects((prev: any[]) => prev.map(item => item.id === p.id ? { ...item, ...p } : item))
         }}
         onDelete={async (id) => {
           if (!isOwnProfile || !confirm('Delete project?')) return
           await supabase.from('projects').delete().eq('id', id)
-          setTargetProjects(prev => prev.filter(item => item.id !== id))
+          setTargetProjects((prev: any[]) => prev.filter(item => item.id !== id))
         }}
         isOwnProfile={isOwnProfile}
       />
@@ -153,7 +153,7 @@ export default function Profile() {
             const { error } = await supabase.from('profiles').update(data).eq('id', authUser?.id)
             if (error) throw error
             await refreshProfile()
-            setTargetProfile(prev => ({ ...prev, ...data }))
+            setTargetProfile((prev: any) => ({ ...prev, ...data }))
           }}
           loading={false}
         />

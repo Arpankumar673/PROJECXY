@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Search, Filter, Briefcase, Users, TrendingUp, ArrowRight, ExternalLink, GraduationCap, CheckCircle2, Globe, Layout, Settings } from 'lucide-react'
+import { Plus, Search, Briefcase, Globe, CheckCircle2, Layout, Settings, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { clsx } from 'clsx'
 

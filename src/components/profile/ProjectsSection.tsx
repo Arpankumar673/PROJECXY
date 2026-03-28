@@ -1,4 +1,4 @@
-import { Plus, Edit3, Trash2, Link2, BookOpen, ExternalLink, GraduationCap, Briefcase, Save, X, Loader2 } from 'lucide-react'
+import { Plus, Edit3, Trash2, Link2, BookOpen, ExternalLink, GraduationCap, Briefcase, Save, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Input from '../ui/Input'

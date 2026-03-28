@@ -1,15 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Users, ArrowRight, Star, Search, Filter, Rocket, CheckCircle2, Briefcase, GraduationCap, Compass } from 'lucide-react'
+import { Plus, Users, ArrowRight, Star, Search, Rocket, CheckCircle2, Briefcase, GraduationCap, Compass } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
 
 const departments = ["Computer Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Management", "Biotechnology"]
 const roles = ["Developer", "Designer", "Marketing", "Researcher", "Manager"]
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(true)
   
   // Filter States

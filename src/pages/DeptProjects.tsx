@@ -1,31 +1,16 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  Search, 
-  Filter, 
-  Users, 
-  Calendar, 
-  ArrowLeft, 
-  ExternalLink, 
   Building,
-  CheckCircle2,
-  Clock,
   AlertCircle,
   RefreshCw,
-  MoreVertical,
-  ChevronRight,
   X,
-  ShieldAlert,
-  BarChart2,
-  ListFilter,
   Layers,
   Trash2,
   SearchIcon,
   Flag,
-  User,
-  Info
+  User
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { clsx } from 'clsx'
 
@@ -45,7 +30,6 @@ interface Project {
 }
 
 export default function DeptProjects() {
-  const navigate = useNavigate()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)

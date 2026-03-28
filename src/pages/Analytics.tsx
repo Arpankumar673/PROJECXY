@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   BarChart3, 
   PieChart as PieChartIcon, 
@@ -13,7 +13,6 @@ import {
   Target,
   ArrowRight,
   ShieldAlert,
-  Calendar,
   Layers,
   Info
 } from 'lucide-react'
@@ -32,7 +31,7 @@ import {
 } from 'recharts'
 import { supabase } from '../lib/supabase'
 import { clsx } from 'clsx'
-import { format, startOfMonth, parseISO } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
 interface Project {
   id: string
@@ -227,9 +226,9 @@ export default function Analytics() {
                        paddingAngle={8} 
                        dataKey="value"
                      >
-                       {data.statusData.map((entry, index) => (
-                         <Cell key={`cell-${index}`} fill={entry.color} cornerRadius={12} />
-                       ))}
+                        {data.statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
                      </Pie>
                      <Tooltip 
                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }}

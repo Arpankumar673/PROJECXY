@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Check, Trash2, Clock, Inbox, Circle, CheckCircle2 } from 'lucide-react'
+import { Bell, Check, Trash2, Clock, Inbox, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
@@ -24,7 +24,7 @@ export default function Notifications() {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
       
       if (!error && data) setNotifications(data)

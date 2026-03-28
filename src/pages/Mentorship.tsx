@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, ShieldCheck, MessageSquare, Search, Filter, Calendar, Clock, ArrowRight, Shield, Award, Users, Plus, X, CheckCircle } from 'lucide-react'
+import { Star, ShieldCheck, MessageSquare, Search, Calendar, Clock, ArrowRight, Shield, Award, Users, X, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -20,7 +20,7 @@ const fields = ["All Fields", "Computer Science", "Management", "Aerospace", "Bi
 const prices = ["All Prices", "Free", "Under ₹1000", "₹1000 - ₹3000", "Over ₹3000"]
 
 export default function Mentorship() {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedField, setSelectedField] = useState('All Fields')
   const [selectedPrice, setSelectedPrice] = useState('All Prices')

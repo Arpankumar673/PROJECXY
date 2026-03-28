@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { Rocket, ShieldCheck, Target, Award, Heart, Mail, Users, Globe, ExternalLink } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ShieldCheck, Target, Award, Mail, Users, Globe, ExternalLink } from 'lucide-react'
 
 export default function About() {
   return (

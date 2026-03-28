@@ -10,7 +10,7 @@ type Role = 'student' | 'department'
 
 export default function Auth() {
   const navigate = useNavigate()
-  const { refreshProfile } = useAuth()
+  const { } = useAuth()
   const [step, setStep] = useState<AuthStep>('role')
   const [role, setRole] = useState<Role>('student')
   const [isLogin, setIsLogin] = useState(true)

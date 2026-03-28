@@ -7,9 +7,7 @@ import {
   Clock, 
   AlertCircle, 
   Search, 
-  Filter, 
   ChevronRight,
-  ExternalLink,
   Calendar,
   Building,
   RefreshCw,
@@ -17,8 +15,7 @@ import {
   Copy,
   Info,
   X,
-  Download,
-  ShieldCheck
+  Download
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -41,7 +38,7 @@ interface Project {
 
 export default function DeptDashboard() {
   const navigate = useNavigate()
-  const { profile, refreshProfile } = useAuth()
+  const { profile } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -55,7 +52,7 @@ export default function DeptDashboard() {
   // Filters
   const [search, setSearch] = useState('')
   const [filterDept, setFilterDept] = useState('All')
-  const [filterStatus, setFilterStatus] = useState('All')
+  const [filterStatus] = useState('All')
 
   const fetchAllProjects = async () => {
     setRefreshing(true)
