@@ -26,10 +26,10 @@ export interface Department {
 export interface Project {
   id: string
   title: string
-  abstract: string
+  description: string
   status: ProjectStatus
-  department_id: string
-  created_by: string
+  department: string | null
+  founder_id: string
   tags: string[]
   created_at: string
   updated_at: string

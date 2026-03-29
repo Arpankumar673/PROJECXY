@@ -17,6 +17,8 @@ import DeptProjects from './pages/DeptProjects.tsx'
 import Analytics from './pages/Analytics.tsx'
 import DiscoverPeople from './pages/DiscoverPeople.tsx'
 import PublicProfile from './pages/PublicProfile.tsx'
+import ProjectOverview from './pages/ProjectOverview.tsx'
+import ProjectAudit from './pages/ProjectAudit.tsx'
 import { useAuth } from './context/AuthContext.tsx'
 
 export default function App() {
@@ -113,6 +115,16 @@ export default function App() {
           <Route 
             path="/profile/:id" 
             element={user && isOnboarded ? <PublicProfile /> : <Navigate to={!user ? "/auth" : "/onboarding"} />} 
+          />
+
+          <Route 
+            path="/project/:id" 
+            element={user && isOnboarded ? <ProjectOverview /> : <Navigate to={!user ? "/auth" : "/onboarding"} />} 
+          />
+
+          <Route 
+            path="/project/:id/audit" 
+            element={user && isOnboarded ? <ProjectAudit /> : <Navigate to={!user ? "/auth" : "/onboarding"} />} 
           />
 
 

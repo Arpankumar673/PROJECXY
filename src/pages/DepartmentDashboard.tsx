@@ -48,9 +48,21 @@ export default function DepartmentDashboard() {
         .order('created_at', { ascending: false })
       
       if (!error && data) {
+        // ✅ SECONDARY SYNC: Fetch real names to avoid join 400 errors
+        const userIds = [...new Set(data.map(p => p.user_id).filter(Boolean))]
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds)
+
+        const profileMap = (profiles || []).reduce((acc: any, curr) => {
+          acc[curr.id] = curr
+          return acc
+        }, {})
+
         setProjects(data.map(p => ({
           ...p,
-          founder_name: "Innovator #" + p.founder_id.slice(0,4), // Mocked for privacy/simplicity
+          founder_name: profileMap[p.user_id]?.full_name || "Innovator #" + (p.user_id?.slice(0, 4) || 'AUTH'),
           team_size: Math.floor(Math.random() * 5) + 1, // Mocked team size
           roles: ['Lead Developer', 'UI/UX Designer', 'Documentation']
         })))

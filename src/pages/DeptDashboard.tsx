@@ -34,6 +34,10 @@ interface Project {
   created_at: string
   leader_name?: string
   is_duplicate?: boolean
+  leader?: {
+    full_name: string
+    avatar_url: string
+  }
 }
 
 export default function DeptDashboard() {
@@ -62,10 +66,30 @@ export default function DeptDashboard() {
       .order('created_at', { ascending: false })
     
     if (!error && data) {
+      // ✅ SECONDARY SYNC: Fetch real names and member counts to avoid join 400 errors
+      const projectIds = data.map(p => p.id)
+      const userIds = [...new Set(data.map(p => p.user_id).filter(Boolean))]
+      
+      const [profilesRes, membersRes] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, avatar_url').in('id', userIds),
+        supabase.from('project_members').select('project_id').in('project_id', projectIds)
+      ])
+
+      const profileMap = (profilesRes.data || []).reduce((acc: any, curr) => {
+        acc[curr.id] = curr
+        return acc
+      }, {})
+
+      const memberCounts = (membersRes.data || []).reduce((acc: any, curr) => {
+        acc[curr.project_id] = (acc[curr.project_id] || 0) + 1
+        return acc
+      }, {})
+
       setProjects(data.map(p => ({
         ...p,
-        leader_name: "Leader #" + p.founder_id.slice(0, 4),
-        team_size: Math.floor(Math.random() * 5) + 3,
+        leader: profileMap[p.user_id],
+        leader_name: profileMap[p.user_id]?.full_name || "Project Leader",
+        team_size: memberCounts[p.id] || 1, // Fallback to 1 (the leader)
         // Mocking some duplicates for demonstration
         is_duplicate: p.title.toLowerCase().includes('solar') || p.title.toLowerCase().includes('smart')
       })))
@@ -414,7 +438,10 @@ export default function DeptDashboard() {
                           <Calendar size={16} />
                           <span>Jan 2024</span>
                        </div>
-                       <button className="flex items-center gap-2 px-6 py-3 bg-gray-50 text-blue-600 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-transparent hover:border-blue-600">
+                       <button 
+                          onClick={() => navigate(`/project/${p.id}`)}
+                          className="flex items-center gap-2 px-6 py-3 bg-gray-50 text-blue-600 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-transparent hover:border-blue-600"
+                       >
                           View Details <ArrowRight size={16} />
                        </button>
                     </div>
