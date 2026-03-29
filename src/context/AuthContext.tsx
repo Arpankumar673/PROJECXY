@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function fetchProfile(userId: string) {
     try {
-      console.log('[PROJECXY AUTH]: Fetching profile for:', userId)
+      console.log('[PROJEXY AUTH]: Fetching profile for:', userId)
       
       const { data, error } = await supabase
         .from('profiles')
@@ -72,9 +72,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error
 
       if (!data) {
-        console.warn('[PROJECXY AUTH]: Profile missing. Fulfilling requirement: Create profile automatically.')
+        console.warn('[PROJEXY AUTH]: Profile missing. Auto-creating baseline entry.')
         
-        // AUTO-CREATE PROFILE if missing (Baseline)
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .upsert({ 
@@ -87,19 +86,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single()
         
         if (createError) {
-           console.error('[PROJECXY AUTH]: Auto-creation blocked by RLS/Constraints:', createError.message)
+           console.error('[PROJEXY AUTH]: Auto-creation failure:', createError.message)
            setProfile({ id: userId, is_onboarded: false, role: 'student' } as any)
         } else {
            setProfile(newProfile)
         }
       } else {
-        console.log('[PROJECXY AUTH]: Profile found. Onboarded info:', data.is_onboarded)
+        console.log('[PROJEXY AUTH]: Profile sync complete. Onboarded:', data.is_onboarded, 'Role:', data.role)
         setProfile(data)
       }
     } catch (err: any) {
-      console.error('[PROJECXY AUTH]: Profile fetch error:', err.message)
-      // Fallback object to allow app to load but keep them in onboarding
-      setProfile({ id: userId, is_onboarded: false } as any)
+      console.error('[PROJEXY AUTH]: Profile fetch error:', err.message)
+      setProfile({ id: userId, is_onboarded: false, role: 'student' } as any)
     } finally {
       setLoading(false)
     }
@@ -119,7 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
     
     if (data?.user && !error) {
-       // Explicitly create the initial profile row to ensure it exists
        await supabase.from('profiles').upsert({
           id: data.user.id,
           full_name: metadata.full_name,
@@ -161,6 +158,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used within an AuthProvider')
+  if (context === undefined) {
+     throw new Error('useAuth must be used within an AuthProvider. Ensure your component tree is wrapped in <AuthProvider> in main.tsx')
+  }
   return context
 }

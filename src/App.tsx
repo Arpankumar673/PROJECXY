@@ -1,26 +1,27 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
-import LandingPage from './pages/LandingPage'
-import Dashboard from './pages/Dashboard'
-import Projects from './pages/Projects'
-import Profile from './pages/Profile'
-import Applications from './pages/Applications'
-import Mentorship from './pages/Mentorship'
-import Notifications from './pages/Notifications'
-import About from './pages/About'
-import Onboarding from './pages/Onboarding'
-import Auth from './pages/Auth'
-import Messages from './pages/Messages'
-import DeptDashboard from './pages/DeptDashboard'
-import DeptProjects from './pages/DeptProjects'
-import Analytics from './pages/Analytics'
-import DiscoverPeople from './pages/DiscoverPeople'
-import PublicProfile from './pages/PublicProfile'
-import { useAuth } from './context/AuthContext'
+import LandingPage from './pages/LandingPage.tsx'
+import Dashboard from './pages/Dashboard.tsx'
+import Projects from './pages/Projects.tsx'
+import Profile from './pages/Profile.tsx'
+import Applications from './pages/Applications.tsx'
+import Mentorship from './pages/Mentorship.tsx'
+import Notifications from './pages/Notifications.tsx'
+import About from './pages/About.tsx'
+import Onboarding from './pages/Onboarding.tsx'
+import Auth from './pages/Auth.tsx'
+import Messages from './pages/Messages.tsx'
+import DeptDashboard from './pages/DeptDashboard.tsx'
+import DeptProjects from './pages/DeptProjects.tsx'
+import Analytics from './pages/Analytics.tsx'
+import DiscoverPeople from './pages/DiscoverPeople.tsx'
+import PublicProfile from './pages/PublicProfile.tsx'
+import { useAuth } from './context/AuthContext.tsx'
 
 export default function App() {
   const { user, profile, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) return (
     <div className="h-screen flex items-center justify-center bg-[#F3F2EF]">
@@ -33,7 +34,6 @@ export default function App() {
   const isDept = role === 'department'
   const isOnboarded = profile?.is_onboarded
 
-  const location = useLocation()
   const showFooter = ["/", "/dashboard"].includes(location.pathname)
 
   return (

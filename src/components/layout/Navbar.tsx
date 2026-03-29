@@ -45,14 +45,33 @@ export default function Navbar() {
   const navItems = isDept ? departmentNavItems : (isStudent ? studentNavItems : [])
 
   useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false)
+        setIsProfileDropdownOpen(false)
+      }
+    }
+
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsProfileDropdownOpen(false)
       }
     }
+
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMobileMenuOpen])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -159,12 +178,91 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-[#666666] hover:bg-black/5 rounded-full"
+            className="md:hidden p-2 text-[#666666] hover:bg-black/5 rounded-full z-[70]"
           >
-            <Menu className={cn("h-6 w-6", isMobileMenuOpen && "rotate-90 transition-transform")} />
+            <Menu className={cn("h-6 w-6 transition-all duration-300", isMobileMenuOpen && "rotate-90 scale-110 text-black")} />
           </button>
         </div>
       </div>
+
+      {/* Mobile Sidebar & Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60] md:hidden"
+            />
+
+            {/* Sidebar */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 w-[280px] bg-white z-[65] md:hidden flex flex-col pt-16 border-r border-[#F3F2EF]"
+            >
+              {/* 1. Minimal Profile Header (Now Clickable) */}
+              <Link 
+                to="/profile"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-6 block hover:bg-gray-50 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-[#EDF3F8] flex items-center justify-center text-[#0A66C2] border border-[#F3F2EF] overflow-hidden flex-shrink-0 group-hover:border-[#0A66C2] transition-colors">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={20} />
+                    )}
+                  </div>
+                  <div className="overflow-hidden">
+                    <h3 className="font-bold text-[15px] text-black leading-tight truncate group-hover:text-[#0A66C2] transition-colors">{profile?.full_name || 'Alumni Developer'}</h3>
+                    <p className="text-[10px] font-medium text-[#666666] tracking-wide mt-0.5">{isDept ? 'Institution Admin' : 'Student Member'}</p>
+                  </div>
+                </div>
+              </Link>
+
+              <div className="px-6 pb-4"><div className="h-px bg-[#F3F2EF]" /></div>
+
+              {/* 2. Streamlined Navigation List */}
+              <div className="flex-grow overflow-y-auto px-3 py-2 space-y-0.5">
+                {!hideNav && navItems.map((item) => {
+                  const isActive = location.pathname === item.path
+                  return (
+                    <Link
+                      key={item.label}
+                      to={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3.5 px-3 py-2.5 rounded-lg transition-all duration-200 group relative',
+                        isActive ? 'bg-[#F3F6F8] text-[#0A66C2]' : 'text-[#666666] hover:bg-gray-50 hover:text-black'
+                      )}
+                    >
+                      <item.icon size={18} className={cn('transition-colors', isActive ? 'text-[#0A66C2]' : 'group-hover:text-black')} strokeWidth={isActive ? 2.5 : 2} />
+                      <span className={cn('text-[14px] font-medium tracking-tight', isActive ? 'font-bold' : 'font-medium')}>{item.label}</span>
+                    </Link>
+                  )
+                })}
+
+                <div className="pt-4 mt-2 border-t border-[#F3F2EF]">
+                  <button 
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3.5 px-3 py-2.5 text-[#666666] hover:text-red-600 font-medium text-[14px] rounded-lg hover:bg-red-50 transition-all group"
+                  >
+                    <LogOut size={18} className="group-hover:text-red-600" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }
