@@ -1,19 +1,10 @@
 import { useState, useEffect } from 'react'
 import { 
   Search, 
-  Filter, 
-  MessageSquare, 
-  FileText, 
   CheckCircle2, 
-  AlertCircle, 
   Clock, 
-  ChevronRight,
-  MoreVertical,
   X,
-  Target,
   Users,
-  Briefcase,
-  ExternalLink,
   ShieldAlert,
   Terminal,
   Zap,
@@ -121,10 +112,7 @@ export default function DeptProjects() {
     return matchesSearch && matchesStatus
   })
 
-  // Duplicate Check logic (Demo)
-  const isDuplicate = (title: string) => {
-    return projects.filter(p => p.title.toLowerCase() === title.toLowerCase()).length > 1
-  }
+  // Removed unused duplicate check to fix deployment error.
 
   // Stuck Project logic (Demo - no update in 7 days)
   const isStuck = (lastUpdated: string) => {

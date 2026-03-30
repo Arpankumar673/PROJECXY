@@ -1,13 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, ArrowRight, Star, Search, Rocket, Briefcase, GraduationCap, Compass, Loader2 } from 'lucide-react'
+import { Plus, ArrowRight, Star, Search, Rocket, Compass, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import CreateProjectModal from '../components/projects/CreateProjectModal'
 import ProjectCard from '../components/projects/ProjectCard'
 
-const departments = ["Computer Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Management", "Biotechnology"]
-const roles = ["Developer", "Designer", "Marketing", "Researcher", "Manager"]
+// Removed unused constants to fix deployment error.
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
@@ -17,8 +16,7 @@ export default function Dashboard() {
   
   // Filter States
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedDept, setSelectedDept] = useState('')
-  const [selectedRole, setSelectedRole] = useState('')
+  // Removed unused filter states to fix deployment error.
 
   const fetchDashboardData = async () => {
     if (!user) return

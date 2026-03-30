@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, CheckCircle2, Layout, Sliders, MessageSquare, ChevronRight, Loader2, AlertCircle } from 'lucide-react'
+import { X, CheckCircle2, Layout, Sliders, MessageSquare, Loader2, AlertCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { supabase } from '../lib/supabase'
 
