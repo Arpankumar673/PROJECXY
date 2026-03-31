@@ -60,34 +60,48 @@ export default function DeptProjects() {
   const fetchProjectDetails = async (project: any) => {
     setSelectedProject(project)
     
-    // 1. Fetch Members
+    // 1. Fetch Leader & Squad Profiles
+    const { data: leaderProfile } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url')
+      .eq('id', project.user_id)
+      .single()
+
     const { data: membersList } = await supabase
       .from('project_members')
       .select('user_id')
       .eq('project_id', project.id)
     
-    if (membersList && membersList.length > 0) {
-      const uids = membersList.map(m => m.user_id)
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', uids)
-      setSelectedProjectMembers(profiles || [])
-    } else {
-      setSelectedProjectMembers([])
-    }
+    let allMembers = []
+    if (leaderProfile) allMembers.push({ ...leaderProfile, isLeader: true })
 
-    // 2. Fetch History (Using correct table: progress_updates)
+    if (membersList && membersList.length > 0) {
+      const uids = membersList.map(m => m.user_id).filter(id => id !== project.user_id)
+      if (uids.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', uids)
+        if (profiles) allMembers = [...allMembers, ...profiles]
+      }
+    }
+    setSelectedProjectMembers(allMembers)
+     // 2. Fetch History (Using correct table: milestones)
     const { data: history } = await supabase
-      .from('progress_updates')
-      .select(`
-        *,
-        profiles:user_id (full_name)
-      `)
+      .from('milestones')
+      .select('*')
       .eq('project_id', project.id)
       .order('created_at', { ascending: false })
     
-    setSelectedProjectHistory(history || [])
+    if (history) {
+      const mappedHistory = history.map(u => ({
+         ...u,
+         stage: u.status,
+         update_text: u.description,
+         profiles: { full_name: 'Innovation Specialist' } // Placeholder as user_id is missing on milestones
+      }))
+      setSelectedProjectHistory(mappedHistory)
+    }
   }
 
   const handleTerminate = async (e: React.MouseEvent) => {
@@ -279,9 +293,18 @@ export default function DeptProjects() {
                        <div className="h-16 w-16 bg-white/5 rounded-3xl flex items-center justify-center text-blue-500 shadow-inner border border-white/10"><Users size={32} /></div>
                        <div>
                           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">SQUAD REGISTRY</p>
-                          <div className="flex gap-2 mt-3">
+                          <div className="flex flex-wrap gap-2 mt-3">
                              {selectedProjectMembers.map(m => (
-                               <div key={m.id} className="h-10 w-10 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center text-gray-400 overflow-hidden"><User size={20} /></div>
+                               <div key={m.id} className="h-10 w-10 bg-white/10 rounded-xl border border-white/20 overflow-hidden group/member relative flex items-center justify-center hover:scale-110 transition-transform">
+                                  {m.avatar_url ? (
+                                     <img src={m.avatar_url} className="h-full w-full object-cover" alt={m.full_name} />
+                                  ) : (
+                                     <div className="h-full w-full flex items-center justify-center text-blue-400 bg-white/5 italic font-black uppercase text-[10px]">{m.full_name?.slice(0, 2) || 'IQ'}</div>
+                                  )}
+                                  <div className="absolute inset-0 bg-blue-600/80 opacity-0 group-hover/member:opacity-100 transition-opacity flex items-center justify-center">
+                                     <span className="text-[8px] font-black uppercase text-white tracking-widest">{m.isLeader ? 'Lead' : 'Member'}</span>
+                                  </div>
+                               </div>
                              ))}
                           </div>
                        </div>

@@ -69,9 +69,20 @@ export default function UpdateProgressModal({
         throw milestoneError
       }
 
-      // 2. Update Project Phase (Graceful fallback if 'progress' column is missing)
-      // We skip 'progress' column update as it was verified missing in schema introspection
-      // but we update the description if we want a manual fallback store? No, keep it clean.
+      // 2. Update Project Phase & Progress (Master Sync)
+      const { error: projectSyncError } = await supabase
+        .from('projects')
+        .update({
+          status: stage,
+          progress: STAGE_PROGRESS[stage] || 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', projectId)
+
+      if (projectSyncError) {
+        console.error('[PROJECXY SYNC]: Project Record Update Failed:', projectSyncError.message)
+        // We continue anyway as the milestone was successfully logged
+      }
       
       setSuccess(true)
       setTimeout(() => {
