@@ -12,7 +12,7 @@ interface Project {
 interface Application {
   id: string
   project_id: string
-  role_applied: string
+  role_name: string
   status: 'pending' | 'accepted' | 'rejected'
   created_at: string
   projects?: Project
@@ -31,11 +31,11 @@ export default function Applications() {
       
       try {
         const { data, error } = await supabase
-          .from('applications')
+          .from('join_requests')
           .select(`
             id,
             project_id,
-            role_applied,
+            role_name,
             status,
             created_at,
             projects (
@@ -140,7 +140,7 @@ export default function Applications() {
                             </div>
                             <div>
                                <h3 className="text-[18px] font-extrabold text-black group-hover:text-[#0A66C2] transition-colors leading-tight mb-1">{app.projects?.title || 'Unknown Project'}</h3>
-                               <p className="text-[10px] font-black text-[#666666] uppercase tracking-widest bg-[#F3F2EF] px-2 py-0.5 rounded inline-block">Role: {app.role_applied}</p>
+                               <p className="text-[10px] font-black text-[#666666] uppercase tracking-widest bg-[#F3F2EF] px-2 py-0.5 rounded inline-block">Role: {app.role_name}</p>
                             </div>
                          </div>
                          
@@ -150,8 +150,8 @@ export default function Applications() {
                                {new Date(app.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                             </div>
                             <div className={clsx(
-                              "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-[0.1em] shadow-sm w-fit",
-                              getStatusStyles(app.status)
+                               "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-[0.1em] shadow-sm w-fit",
+                               getStatusStyles(app.status)
                             )}>
                                {getStatusIcon(app.status)}
                                {app.status}

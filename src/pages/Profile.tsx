@@ -108,43 +108,46 @@ export default function Profile() {
   if (!targetProfile) return null
 
   return (
-    <div className="max-w-[1128px] mx-auto py-8 px-4 lg:px-0 space-y-3 animate-in fade-in duration-700">
-      <ProfileHeader 
-        profile={targetProfile} 
-        onEdit={() => setIsEditModalOpen(true)} 
-        onAvatarUpdate={refreshProfile}
-        isOwnProfile={isOwnProfile}
-      />
+    <div className="max-w-[1128px] mx-auto py-4 md:py-8 px-0 md:px-4 lg:px-0 space-y-4 md:space-y-6 animate-in fade-in duration-700 overflow-x-hidden">
+      <div className="px-3 md:px-0">
+        <ProfileHeader 
+          profile={targetProfile} 
+          onEdit={() => setIsEditModalOpen(true)} 
+          onAvatarUpdate={refreshProfile}
+          isOwnProfile={isOwnProfile}
+        />
+      </div>
 
-      <AboutSection 
-        bio={targetProfile.bio} 
-        onSave={handleUpdateBio} 
-        isOwnProfile={isOwnProfile}
-      />
+      <div className="px-3 md:px-0 space-y-4 md:space-y-6">
+        <AboutSection 
+          bio={targetProfile.bio} 
+          onSave={handleUpdateBio} 
+          isOwnProfile={isOwnProfile}
+        />
 
-      <ProjectsSection 
-        projects={targetProjects}
-        onAdd={handleAddProject}
-        onEdit={async (p) => {
-          if (!isOwnProfile) return
-          await supabase.from('projects').update(p).eq('id', p.id)
-          setTargetProjects((prev: any[]) => prev.map(item => item.id === p.id ? { ...item, ...p } : item))
-        }}
-        onDelete={async (id) => {
-          if (!isOwnProfile || !confirm('Delete project?')) return
-          await supabase.from('projects').delete().eq('id', id)
-          setTargetProjects((prev: any[]) => prev.filter(item => item.id !== id))
-        }}
-        isOwnProfile={isOwnProfile}
-      />
+        <ProjectsSection 
+          projects={targetProjects}
+          onAdd={handleAddProject}
+          onEdit={async (p) => {
+            if (!isOwnProfile) return
+            await supabase.from('projects').update(p).eq('id', p.id)
+            setTargetProjects((prev: any[]) => prev.map(item => item.id === p.id ? { ...item, ...p } : item))
+          }}
+          onDelete={async (id) => {
+            if (!isOwnProfile || !confirm('Delete project?')) return
+            await supabase.from('projects').delete().eq('id', id)
+            setTargetProjects((prev: any[]) => prev.filter(item => item.id !== id))
+          }}
+          isOwnProfile={isOwnProfile}
+        />
 
-      <SkillsSection 
-        skills={targetProfile.skills || []} 
-        onUpdate={handleUpdateSkills} 
-        isOwnProfile={isOwnProfile}
-      />
-
-      {isOwnProfile && (
+        <SkillsSection 
+          skills={targetProfile.skills || []} 
+          onUpdate={handleUpdateSkills} 
+          isOwnProfile={isOwnProfile}
+        />
+      </div>
+       {isOwnProfile && (
         <EditProfileModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}

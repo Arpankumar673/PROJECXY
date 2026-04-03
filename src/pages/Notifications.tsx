@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Check, Trash2, Clock, Inbox, CheckCircle2 } from 'lucide-react'
+import { Bell, Check, Trash2, Inbox, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { clsx } from 'clsx'
 
 interface Notification {
   id: string
-  content: string
-  is_read: boolean
+  title: string
+  message: string
+  type: 'success' | 'info' | 'warning' | 'error'
+  read: boolean
   created_at: string
 }
 
@@ -66,7 +68,7 @@ export default function Notifications() {
   const markAsRead = async (id: string) => {
     const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ read: true })
       .eq('id', id)
     
     if (error) console.error('Error marking as read:', error)
@@ -76,9 +78,9 @@ export default function Notifications() {
     if (!user) return
     const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ read: true })
       .eq('user_id', user.id)
-      .eq('is_read', false)
+      .eq('read', false)
     
     if (error) console.error('Error marking all as read:', error)
   }
@@ -113,23 +115,23 @@ export default function Notifications() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#D9E2ED] pb-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-black tracking-tight uppercase">Notifications</h1>
-          <p className="text-sm text-[#666666] font-medium">Stay updated with your latest project activity.</p>
+          <h1 className="text-3xl font-black text-black tracking-tight uppercase italic">Live Console</h1>
+          <p className="text-sm text-[#666666] font-medium uppercase tracking-widest text-[10px]">Transmission Hub</p>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={markAllAsRead}
-            disabled={!notifications.some(n => !n.is_read)}
-            className="h-10 px-4 bg-[#F3F6F9] text-[#666666] font-bold text-xs rounded-lg hover:bg-[#EBEBEB] transition-colors disabled:opacity-50 flex items-center gap-2"
+            disabled={!notifications.some(n => !n.read)}
+            className="h-10 px-4 bg-[#F3F6F9] text-[#666666] font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-[#EBEBEB] transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             <CheckCircle2 size={16} /> Mark all Read
           </button>
           <button 
             onClick={clearAll}
             disabled={notifications.length === 0}
-            className="h-10 px-4 text-red-600 font-bold text-xs rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="h-10 px-4 text-red-600 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            <Trash2 size={16} /> Clear All
+            <Trash2 size={16} /> Purge Hub
           </button>
         </div>
       </div>
@@ -146,39 +148,38 @@ export default function Notifications() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
                 className={clsx(
-                  "li-card p-4 transition-all relative group flex items-start gap-4 cursor-pointer",
-                  !n.is_read ? "bg-[#EDF3F8] border-[#0A66C2]/20" : "bg-white border-[#D9E2ED]/60"
+                  "li-card p-6 transition-all relative group flex items-start gap-4 cursor-pointer rounded-2xl border-l-[6px]",
+                  !n.read ? "bg-[#F0F7FF] border-[#0A66C2]" : "bg-white border-gray-100",
+                  n.type === 'success' && !n.read && "border-emerald-500 bg-emerald-50/30"
                 )}
-                onClick={() => !n.is_read && markAsRead(n.id)}
+                onClick={() => !n.read && markAsRead(n.id)}
               >
-                {!n.is_read && (
-                   <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[#0A66C2] rounded-full" />
-                )}
-                
                 <div className={clsx(
-                   "h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0",
-                   !n.is_read ? "bg-[#0A66C2] text-white" : "bg-[#F3F6F9] text-[#666666]"
+                   "h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm",
+                   n.type === 'success' ? "bg-emerald-500 text-white" : "bg-[#0A66C2] text-white"
                 )}>
-                   <Bell size={20} />
+                   {n.type === 'success' ? <CheckCircle2 size={24} /> : <Bell size={24} />}
                 </div>
 
-                <div className="flex-grow space-y-1 py-0.5">
-                   <p className={clsx(
-                     "text-sm leading-relaxed",
-                     !n.is_read ? "text-black font-extrabold" : "text-[#666666] font-medium"
-                   )}>
-                     {n.content}
-                   </p>
-                   <div className="flex items-center gap-2 text-[10px] font-black text-[#666666]/60 uppercase tracking-widest">
-                      <Clock size={12} /> {formatTime(n.created_at)}
-                      {!n.is_read && <span className="text-[#0A66C2]">∙ NEW</span>}
+                <div className="flex-grow space-y-1">
+                   <div className="flex justify-between items-center">
+                     <p className={clsx(
+                       "text-sm uppercase font-black tracking-tighter italic",
+                       !n.read ? "text-black" : "text-[#666666]"
+                     )}>
+                       {n.title}
+                     </p>
+                     <span className="text-[9px] font-black text-gray-400">{formatTime(n.created_at)}</span>
                    </div>
+                   <p className="text-sm font-medium text-[#666666] leading-relaxed">
+                     {n.message}
+                   </p>
                 </div>
 
-                {!n.is_read && (
+                {!n.read && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
-                    className="opacity-0 group-hover:opacity-100 p-2 hover:bg-[#D9E2ED] rounded-full transition-all text-[#0A66C2]"
+                    className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white rounded-full transition-all text-[#0A66C2] shadow-sm"
                   >
                     <Check size={18} />
                   </button>

@@ -161,35 +161,35 @@ export default function ProjectsSection({ projects, onAdd, onEdit, onDelete, isO
             <motion.div 
               key={project.id} 
               layout
-              className="flex flex-col md:flex-row gap-4 group/item pb-6 border-b border-[#F3F2EF] last:border-0 grow animate-in fade-in"
+              className="flex flex-col md:flex-row gap-5 group/item pb-6 border-b border-[#F3F2EF] last:border-0 animate-in fade-in"
             >
-              <div className="h-14 w-14 bg-[#EDF3F8] rounded-sm flex-shrink-0 flex items-center justify-center border border-[#0A66C2]/10 transition-transform group-hover/item:rotate-3 shadow-sm">
+              <div className="h-14 w-14 bg-[#EDF3F8] rounded-xl flex-shrink-0 flex items-center justify-center border border-[#0A66C2]/10 transition-transform group-hover/item:rotate-3 shadow-sm mx-auto md:mx-0">
                 <Briefcase className="h-7 w-7 text-[#0A66C2]" />
               </div>
-              <div className="flex-grow space-y-2">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-0.5">
-                    <h3 className="text-[17px] font-bold text-black hover:text-[#0A66C2] hover:underline cursor-pointer leading-tight transition-colors">{project.title}</h3>
-                    <p className="text-sm text-[#000000e6] font-semibold">{project.role} · <span className="text-[#666666] font-medium">{project.year_of_study} Year</span></p>
+              <div className="flex-grow space-y-3 text-center md:text-left">
+                <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-2">
+                  <div className="space-y-1">
+                    <h3 className="text-[18px] font-black text-black hover:text-[#0A66C2] hover:underline cursor-pointer leading-tight transition-colors uppercase tracking-tight">{project.title}</h3>
+                    <p className="text-sm text-[#000000e6] font-bold">{project.role} · <span className="text-[#666666] font-medium">{project.year_of_study} Year</span></p>
                   </div>
                   {isOwnProfile && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 pt-2 md:pt-0 opacity-100 md:opacity-0 group-hover/item:opacity-100 transition-opacity">
                       <button 
                         onClick={() => startEdit(project)}
-                        className="p-1.5 hover:bg-black/5 rounded-full text-[#666666] hover:text-[#0A66C2] transition-all"
+                        className="h-10 w-10 flex items-center justify-center hover:bg-black/5 rounded-full text-[#666666] hover:text-[#0A66C2] transition-all border border-transparent md:border-none"
                       >
                         <Edit3 size={18} />
                       </button>
                       <button 
                         onClick={() => onDelete(project.id!)}
-                        className="p-1.5 hover:bg-black/5 rounded-full text-[#666666] hover:text-red-600 transition-all"
+                        className="h-10 w-10 flex items-center justify-center hover:bg-black/5 rounded-full text-[#666666] hover:text-red-600 transition-all border border-transparent md:border-none"
                       >
                         <Trash2 size={18} />
                       </button>
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-[#000000e6] font-medium leading-[1.6] line-clamp-3 group-hover/item:line-clamp-none transition-all">
+                <p className="text-[15px] text-[#000000e6] font-medium leading-[1.6] line-clamp-3 md:line-clamp-none transition-all px-2 md:px-0">
                   {project.description}
                 </p>
                 {project.project_link && (
@@ -197,24 +197,29 @@ export default function ProjectsSection({ projects, onAdd, onEdit, onDelete, isO
                     href={project.project_link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-1.5 pt-2 text-[#666666] hover:text-[#0A66C2] cursor-pointer transition-colors w-fit"
+                    className="flex items-center justify-center md:justify-start space-x-1.5 pt-3 text-[#666666] hover:text-[#0A66C2] cursor-pointer transition-colors w-full md:w-fit"
                   >
                     <ExternalLink className="h-4 w-4" />
-                    <span className="text-[14px] font-bold">View project repository</span>
+                    <span className="text-xs font-black uppercase tracking-widest">View Repository</span>
                   </a>
                 )}
               </div>
             </motion.div>
           ))
         ) : (
-          <div className="py-8 text-center space-y-2 bg-[#F3F6F9] rounded-lg border-2 border-dashed border-[#0A66C2]/20">
-            <BookOpen className="h-10 w-10 text-[#666666] mx-auto opacity-50" />
-            <p className="text-sm text-[#666666] font-bold">No projects featured yet.</p>
+          <div className="min-h-[220px] flex flex-col items-center justify-center text-center space-y-4 bg-[#F3F6F9] rounded-2xl border-2 border-dashed border-[#0A66C2]/10 p-8">
+            <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <BookOpen className="h-8 w-8 text-[#0A66C2]/40" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-[15px] text-[#666666] font-black uppercase tracking-widest">The Mission Story Begins</p>
+              <p className="text-sm text-[#666666] font-medium opacity-60">Every great innovation starts with a single log.</p>
+            </div>
             <button 
               onClick={() => setIsAdding(true)}
-              className="text-[#0A66C2] font-black text-xs uppercase tracking-widest hover:underline"
+              className="li-button-primary h-11 px-8 text-xs font-black uppercase tracking-widest"
             >
-              Start Your First Project →
+              Launch First Project
             </button>
           </div>
         )}

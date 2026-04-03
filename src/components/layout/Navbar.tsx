@@ -83,7 +83,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white border-b border-[#EBEBEB] shadow-sm">
-      <div className="max-w-[1128px] mx-auto px-4 lg:px-0 text-gray-900">
+      <div className="max-w-[1240px] mx-auto px-3 md:px-8 text-gray-900">
         <div className="flex h-14 items-center justify-between gap-4">
           
           <div className="flex items-center space-x-2">
@@ -91,7 +91,7 @@ export default function Navbar() {
               <div className="h-8 w-8 bg-[#0A66C2] rounded-[3px] flex items-center justify-center group-hover:bg-[#004182] transition-colors shadow-sm">
                 <span className="text-white font-black text-xl leading-none italic">P</span>
               </div>
-              <span className="text-xl font-black text-black tracking-tighter uppercase hidden sm:block">Projecxy</span>
+              <span className="text-xl font-black text-black tracking-tighter uppercase hidden md:block">Projecxy</span>
             </Link>
           </div>
 

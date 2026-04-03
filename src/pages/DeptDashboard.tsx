@@ -38,6 +38,10 @@ interface Project {
     full_name: string
     avatar_url: string
   }
+  team?: {
+    full_name: string
+    role: string
+  }[]
 }
 
 export default function DeptDashboard() {
@@ -71,8 +75,10 @@ export default function DeptDashboard() {
       const userIds = [...new Set(data.map(p => p.user_id).filter(Boolean))]
       
       const [profilesRes, membersRes] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, avatar_url').in('id', userIds),
-        supabase.from('project_members').select('project_id').in('project_id', projectIds)
+        supabase.from('profiles').select('id, full_name, avatar_url').in('id', [...userIds]),
+        supabase.from('project_members')
+          .select('project_id, user_id, role, profiles:user_id(full_name)')
+          .in('project_id', projectIds)
       ])
 
       const profileMap = (profilesRes.data || []).reduce((acc: any, curr) => {
@@ -80,19 +86,33 @@ export default function DeptDashboard() {
         return acc
       }, {})
 
-      const memberCounts = (membersRes.data || []).reduce((acc: any, curr) => {
-        acc[curr.project_id] = (acc[curr.project_id] || 0) + 1
+      const projectTeamsMap = (membersRes.data || []).reduce((acc: any, curr: any) => {
+        if (!acc[curr.project_id]) acc[curr.project_id] = []
+        acc[curr.project_id].push({
+          full_name: curr.profiles?.full_name || 'Innovator',
+          role: curr.role || 'Contributor'
+        })
         return acc
       }, {})
 
-      setProjects(data.map(p => ({
-        ...p,
-        leader: profileMap[p.user_id],
-        leader_name: profileMap[p.user_id]?.full_name || "Project Leader",
-        team_size: memberCounts[p.id] || 1, // Fallback to 1 (the leader)
-        // Mocking some duplicates for demonstration
-        is_duplicate: p.title.toLowerCase().includes('solar') || p.title.toLowerCase().includes('smart')
-      })))
+      setProjects(data.map(p => {
+        const team = projectTeamsMap[p.id] || []
+        // Add leader to team if not present
+        const leaderName = profileMap[p.user_id]?.full_name || "Project Leader"
+        if (!team.some((m: any) => m.full_name === leaderName)) {
+           team.unshift({ full_name: leaderName, role: 'Project Lead' })
+        }
+
+        return {
+          ...p,
+          leader: profileMap[p.user_id],
+          leader_name: leaderName,
+          team_size: team.length,
+          team: team,
+          // Mocking some duplicates for demonstration
+          is_duplicate: p.title.toLowerCase().includes('solar') || p.title.toLowerCase().includes('smart')
+        }
+      }))
     }
     setLoading(false)
     setRefreshing(false)
@@ -404,11 +424,20 @@ export default function DeptDashboard() {
                   >
                     <div className="flex justify-between items-start mb-6">
                        <div>
-                          <h3 className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors uppercase tracking-tighter leading-none">{p.title}</h3>
-                          <div className="flex items-center gap-2 text-gray-400 font-bold mt-2">
-                             <UserIcon className="h-5 w-5" />
-                             <span className="text-sm">Lead by {p.leader_name}</span>
-                          </div>
+                           <h3 className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors uppercase tracking-tighter leading-none">{p.title}</h3>
+                           <div className="mt-4 space-y-2">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Team:</p>
+                              <div className="space-y-1">
+                                 {p.team?.slice(0, 3).map((m: any, idx: number) => (
+                                    <p key={idx} className="text-sm font-bold text-gray-600 italic">
+                                       <span className="text-gray-900">{m.full_name}</span> — <span className="text-gray-400 text-[11px] font-black uppercase">{m.role}</span>
+                                    </p>
+                                 ))}
+                                 {p.team && p.team.length > 3 && (
+                                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">+ {p.team.length - 3} more members</p>
+                                 )}
+                              </div>
+                           </div>
                        </div>
                     </div>
 
