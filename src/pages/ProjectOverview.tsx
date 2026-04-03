@@ -66,7 +66,7 @@ export default function ProjectOverview() {
   const [loading, setLoading] = useState(true)
   const [myRequest, setMyRequest] = useState<any>(null)
   const [incomingRequests, setIncomingRequests] = useState<any[]>([])
-  const [processingId, setProcessingId] = useState<string | null>(null)
+
   
   // Department Controls States
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
@@ -173,8 +173,7 @@ export default function ProjectOverview() {
   }
 
   const handleRequestAction = async (requestId: string, status: 'accepted' | 'rejected', candidateId: string, roleName: string) => {
-     setProcessingId(requestId)
-     try {
+      try {
        const { data: updatedRows, error: updateError } = await supabase
          .from('join_requests')
          .update({ status })
@@ -211,8 +210,6 @@ export default function ProjectOverview() {
      } catch (err: any) {
        console.error('[PROJECXY ERROR]:', err)
        alert(`CRITICAL ERROR: ${err.message || 'Unknown Error'}. Details logged to console.`)
-     } finally {
-       setProcessingId(null)
      }
   }
   

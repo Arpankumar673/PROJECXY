@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Zap, CheckCircle2, Loader2, Sparkles, Terminal } from 'lucide-react'
+import { X, Send, Zap, CheckCircle2, Loader2, Sparkles } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { clsx } from 'clsx'
